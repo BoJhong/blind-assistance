@@ -1,0 +1,6 @@
+pyrealsense2
+ultralytics
+opencv-python
+toml
+sahi
+cap_from_youtube
