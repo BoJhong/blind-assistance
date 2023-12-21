@@ -4,14 +4,14 @@ import numpy as np
 from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
 from ultralytics import YOLO
-from .. import TOMLConfig
+
 from .base import DetectionModel
 
 
 class Yolov8SahiDetectionModel(DetectionModel):
-    def load_env(self):
-        self.yolo_env = TOMLConfig.instance.env["yolo"]
-        self.sahi_env = TOMLConfig.instance.env["sahi"]
+    def load_env(self, config: Any):
+        self.yolo_env = config.env["yolo"]
+        self.sahi_env = config.env["sahi"]
 
     def load_model(self):
         self.set_model(

@@ -3,4 +3,5 @@ ultralytics
 opencv-python
 toml
 sahi
+imutils
 cap_from_youtube

@@ -1,11 +1,11 @@
 import threading
 import time
 from enum import Enum
+from typing import Any
 
 import cv2
 
 from .utils import find_nearest
-from .. import TOMLConfig
 from ..alarm.alarm import Alarm
 from ..detect_obstacle.detect_obstacle import DetectObstacle
 
@@ -17,10 +17,11 @@ class SignalStatus(Enum):
 
 
 class DetectCrosswalkSignal:
-    def __init__(self):
-        # self.csd_env = TOMLConfig.instance.env["crosswalk_signal_detection"]
+    def __init__(self, config: Any):
+        self.dcs_env = config.env["detect_crosswalk_signal"]
         self.signal_status = SignalStatus.NONE
         self.invalid_time = -1
+        self.is_alarm = False
 
     def __call__(self, image, prediction_list, names):
         """
@@ -30,6 +31,9 @@ class DetectCrosswalkSignal:
         :param names: 模型所有類別名稱
         :return image: 畫上行人號誌的圖片
         """
+        if self.is_alarm:
+            return
+
         found, nearest_object = find_nearest(image, prediction_list, names)
 
         if not found:
@@ -56,27 +60,16 @@ class DetectCrosswalkSignal:
         if self.signal_status == SignalStatus.NONE:
             return
 
-        def _():
-            if DetectObstacle.instance:
-                DetectObstacle.instance.pause_alarm()
-                time.sleep(0.5)
+        self.is_alarm = True
 
-            if self.signal_status == SignalStatus.RED:
-                print("紅燈")
-                # Alarm.instance.play_sound(1000, 2)
-                Alarm.instance.play_notes(["C4", "E4", "G4"], 2)
-                self.invalid_time = -1
-            else:
-                print("綠燈")
-                Alarm.instance.play_sound(3000, 2)
-                self.invalid_time = -1
+        if self.signal_status == SignalStatus.RED:
+            print("紅燈")
+            notes = ["G4", "E4", "D4", "C4"]
+        else:
+            print("綠燈")
+            notes = ["C4", "D4", "E4", "G4"]
 
-            time.sleep(0.5)
-
-            if DetectObstacle.instance:
-                DetectObstacle.instance.resume_alarm()
-
-        threading.Thread(target=_).start()
+        threading.Thread(target=self.play_notes, args=notes).start()
 
     def draw_line(self, image, box):
         image = image.copy()
@@ -97,21 +90,30 @@ class DetectCrosswalkSignal:
 
         if self.invalid_time == -1:
             self.invalid_time = time.time() * 1000
-        elif time.time() * 1000 - self.invalid_time > 5000:
+        elif (
+            time.time() * 1000 - self.invalid_time > self.dcs_env["invalid_time"] * 1000
+        ):
             self.invalid_time = -1
             self.signal_status = SignalStatus.NONE
-
-            if DetectObstacle.instance:
-                DetectObstacle.instance.pause_alarm()
-                time.sleep(0.5)
-
-            Alarm.instance.play_sound(2000, 2)
+            notes = ["E4", "D4"]
+            threading.Thread(target=self.play_notes, args=notes).start()
             print("沒有行人號誌，重置狀態")
-
-            time.sleep(0.5)
-
-            if DetectObstacle.instance:
-                DetectObstacle.instance.resume_alarm()
 
     def is_none(self):
         return self.signal_status == SignalStatus.NONE
+
+    def play_notes(self, *args):
+        if DetectObstacle.instance:
+            DetectObstacle.instance.pause_alarm()
+            time.sleep(0.5)
+
+        notes = [note for note in args]
+
+        Alarm.instance.play_notes(notes)
+        self.invalid_time = -1
+
+        if DetectObstacle.instance:
+            time.sleep(0.5)
+            DetectObstacle.instance.resume_alarm()
+
+        self.is_alarm = False

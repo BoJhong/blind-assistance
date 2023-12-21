@@ -6,7 +6,7 @@ import numpy as np
 import pyrealsense2 as rs
 
 
-def default_config():
+def default_setting():
     config = rs.config()
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 15)
     config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 15)
@@ -98,9 +98,8 @@ def get_middle_dist(image: np.ndarray, box, depth_data, rand_num):
     distance_list = np.sort(distance_list)[
         rand_num // 2 - rand_num // 4 : rand_num // 2 + rand_num // 4
     ]  # 冒泡排序+中值濾波
-    result_dist = np.mean(distance_list)
 
-    if len(distance_list) > 0 and not math.isnan(result_dist):
-        return result_dist
+    if len(distance_list) > 0:
+        return np.mean(distance_list)
     else:
         return -1

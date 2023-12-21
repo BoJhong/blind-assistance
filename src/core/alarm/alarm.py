@@ -1,9 +1,9 @@
 import threading
 import time
+from typing import Any
 
 import winsound
 
-from src.core import TOMLConfig
 from .pitches import pitches
 
 
@@ -11,10 +11,10 @@ class Alarm:
     instance = None
     exec_status = False
 
-    def __init__(self):
+    def __init__(self, config: Any):
         Alarm.instance = self
 
-        self.alarm_env = TOMLConfig.instance.env["alarm"]
+        self.alarm_env = config.env["alarm"]
 
         self.message = "警報！"
         self.duration = 1
@@ -38,10 +38,10 @@ class Alarm:
 
         threading.Thread(target=_).start()
 
-    def start(self, message: str = None, duration: float = 1):
+    def start(self, message: str = "警報！", duration: float = 1, frequency: int = 2500):
         self.duration = duration
-        if message:
-            self.message = message
+        self.frequency = frequency
+        self.message = message
 
         if self.exec_status:
             return
@@ -55,7 +55,7 @@ class Alarm:
         self.loop = True
         while self.exec_status:
             self.play_sound(self.frequency, self.duration)
-            if self.alarm_env["print"]:
+            if self.alarm_env["print"] and self.message is not None:
                 print(self.message)
             time.sleep(self.duration * 2)
         self.loop = False

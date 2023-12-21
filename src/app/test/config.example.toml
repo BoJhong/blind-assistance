@@ -1,3 +1,5 @@
+[config]
+debug = true # 除錯模式
 image = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSY9C2RHWzywJ-UWqQcb7-wf6xYnV_VEKKB3w&usqp=CAU"
 video = "https://youtu.be/hdhc03RoTZY?feature=shared"
 
@@ -5,12 +7,14 @@ video = "https://youtu.be/hdhc03RoTZY?feature=shared"
 print = true          # 印出警告訊息
 windows_sound = true  # 播放Windows警告音效
 
+[detect_crosswalk_signal]
+invalid_time = 10  # 無效時間(秒)
+
 [realsense]
 depth_min = 0.11  # 深度攝影機最近深度距離
 depth_max = 1.0   # 深度攝影機最遠深度距離
 
 [yolo]
-debug = true                      # 除錯模式
 confidence_threshold = 0.3        # 置信度閥值
 model = "models/yolov8n.pt"       # YOLO官方模型
 cs_model = "models/best.pt"       # 行人號誌模型

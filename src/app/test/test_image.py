@@ -5,26 +5,28 @@ import imutils
 import numpy as np
 import requests
 
-from src.core import TOMLConfig, YOLOv8
+from src.core import TOMLConfig, Yolov8SahiDetectionModel
 
 windowName = "Image Test"
 cv2.namedWindow(windowName, cv2.WINDOW_AUTOSIZE)
 
-setting = TOMLConfig(os.path.join(__file__, "../config.toml"))
-yolov8 = YOLOv8(setting.env["yolo"]["cs_model"])
+config = TOMLConfig(os.path.join(__file__, "../config.toml"))
+yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
 
-if setting.env["image"].startswith("http"):
-    response = requests.get(setting.env["image"]).content
+config_env = config.env["config"]
+if config_env["image"].startswith("http"):
+    response = requests.get(config_env["image"]).content
     np_arr = np.frombuffer(response, np.uint8)
     img = cv2.imdecode(np_arr, cv2.IMREAD_UNCHANGED)
 else:
-    img = cv2.imread(setting.env["image"])
+    img = cv2.imread(config_env["image"])
+img = imutils.resize(img, height=720)
 
-prediction_list = yolov8(img)
-if prediction_list and len(prediction_list) > 0:
-    object_exists, combined_img = yolov8.draw_detections(img, prediction_list)
-    cv2.imshow(windowName, imutils.resize(combined_img, height=480))
+object_exists, prediction_list = yolov8_sahi(img)
+if object_exists is not None:
+    combined_img = yolov8_sahi.draw_detections(img, prediction_list)
+    cv2.imshow(windowName, combined_img)
 else:
-    cv2.imshow(windowName, imutils.resize(img, height=480))
+    cv2.imshow(windowName, img)
 
 key = cv2.waitKey()

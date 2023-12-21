@@ -22,7 +22,7 @@ def draw_detections(
     for class_id, box, score in prediction_list:
         color = colors[class_id]
         draw_box(det_img, box, color)
-        if TOMLConfig.instance.env["yolo"]["debug"]:
+        if TOMLConfig.instance.env["config"]["debug"]:
             label = category[class_id]
             caption = f"{label} {int(score * 100)}%"
             if depth_data is not None:

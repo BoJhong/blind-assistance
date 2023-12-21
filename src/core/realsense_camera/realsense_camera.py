@@ -1,5 +1,5 @@
 import math
-from typing import Tuple
+from typing import Tuple, Any
 
 import numpy as np
 import pyrealsense2 as rs
@@ -8,8 +8,8 @@ from .motion import get_motion, draw_motion
 from .utils import (
     is_pixel_inside_image,
     get_rotation_matrix,
-    default_config,
     intrin_and_extrin,
+    default_setting,
 )
 from .. import TOMLConfig
 
@@ -17,12 +17,12 @@ from .. import TOMLConfig
 class RealsenseCamera:
     instance = None
 
-    def __init__(self, config=None):
+    def __init__(self, config: Any, setting=None):
         RealsenseCamera.instance = self
 
-        self.rs_env = TOMLConfig.instance.env["realsense"]
+        self.rs_env = config.env["realsense"]
         self.pipeline = rs.pipeline()
-        self.config = config or default_config()
+        self.config = setting or default_setting()
         self.profile = self.pipeline.start(self.config)
 
         self.pitch = 0
@@ -71,7 +71,7 @@ class RealsenseCamera:
 
         return height, int(horizontal_distance), depth_point
 
-    def rs2_project_color_pixel_to_depth_pixel(
+    def project_color_pixel_to_depth_pixel(
         self, data: np.ndarray, from_pixel: Tuple[int, int]
     ):
         depth_pixel = rs.rs2_project_color_pixel_to_depth_pixel(
@@ -107,7 +107,6 @@ class RealsenseCamera:
 
         depth_image = np.asanyarray(depth_frame.get_data())
         img_height, img_width = depth_image.shape[:2]
-        print(self.pitch)
         if (
             img_width > world_point[0] > 0
             and img_height > world_point[1] > 0

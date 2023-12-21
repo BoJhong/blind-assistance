@@ -3,7 +3,6 @@ from typing import Optional, Dict, Any
 import numpy as np
 
 from .utils import draw_detections
-from .. import TOMLConfig
 
 
 class DetectionModel:
@@ -11,6 +10,7 @@ class DetectionModel:
 
     def __init__(
         self,
+        config: Any,
         model_path: str,
         confidence_threshold: float = 0.3,
         category_mapping: Optional[Dict] = None,
@@ -21,7 +21,7 @@ class DetectionModel:
         :param model_path: 模型檔案路徑
         """
         self.instance = self
-        self.load_env()
+        self.load_env(config)
         if load_at_init:
             self.model_path = model_path
             self.confidence_threshold = confidence_threshold
@@ -29,7 +29,7 @@ class DetectionModel:
             rng = np.random.default_rng(1)
             self.colors = rng.uniform(0, 255, size=(len(self.category), 3))
 
-    def load_env(self):
+    def load_env(self, env: Any):
         pass
 
     def load_model(self):

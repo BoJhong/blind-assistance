@@ -1,15 +1,28 @@
+[config]
+debug = true  # 除錯模式
+
 [alarm]
 print = true          # 印出警告訊息
 windows_sound = true  # 播放Windows警告音效
 
+[detect_crosswalk_signal]
+invalid_time = 10  # 無效時間(秒)
+
 [obstacle_detection]
-debug = true                           # 除錯模式
-my_height = 180                        # 身高
-camera_height = 100                    # 攝影機高度
-lowest_obstacle_height = 5             # 最低障礙物高度
-highest_hole_height = -10              # 最高坑洞高度
-missing_point_threshold = 10           # 缺失點閥值
-missing_point_alarm_interval = 0.3     # 缺失點警告間隔
+my_height = 180                     # 身高
+camera_height = 100                 # 攝影機高度
+lowest_obstacle_height = 5          # 最低障礙物高度
+highest_hole_height = -10           # 最高坑洞高度
+missing_point_alarm = false         # 缺失點警告
+missing_point_threshold = 10        # 缺失點閥值
+missing_point_alarm_interval = 0.3  # 缺失點警告間隔
+# 檢測區域
+area = [
+    [0, 0],
+    [0, 720],
+    [1280, 720],
+    [1280, 0]
+]
 # 坑洞距離警告配置
 hole_preset = [
     { distance = 500, interval = 0.3, name = "近距離" },
@@ -28,7 +41,6 @@ depth_min = 0.11  # 深度攝影機最近深度距離
 depth_max = 1.0   # 深度攝影機最遠深度距離
 
 [yolo]
-debug = true                      # 除錯模式
 confidence_threshold = 0.3        # 置信度閥值
 model = "models/yolov8n.pt"       # YOLO官方模型
 cs_model = "models/best.pt"       # 行人號誌模型
