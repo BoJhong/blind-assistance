@@ -58,5 +58,7 @@ class Yolov8DetectionModel(DetectionModel):
         """
 
         return self._process_object_prediction(
-            self.model.predict(img, conf=self.confidence_threshold, agnostic_nms=True)
+            self.model.predict(
+                img, conf=self.confidence_threshold, agnostic_nms=True, verbose=False
+            )
         )

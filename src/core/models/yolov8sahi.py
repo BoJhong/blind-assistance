@@ -99,6 +99,6 @@ class Yolov8SahiDetectionModel(DetectionModel):
                 slice_width=slice_width,
                 overlap_height_ratio=overlap_height_ratio,
                 overlap_width_ratio=overlap_width_ratio,
-                verbose=0,
+                verbose=False,
             ).object_prediction_list
         )
