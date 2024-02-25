@@ -6,27 +6,35 @@ import numpy as np
 from ..alarm.alarm import Alarm
 
 alarm = False
+max_obstacle_dist = 0
 
 
-def is_hole(od_env, height):
-    return height < od_env["highest_hole_height"]
+def is_hole(od_env, height, lateral_dist):
+    return lateral_dist < 150 and height < od_env["highest_hole_height"]
 
 
-def is_obstacle(od_env, height, dist):
-    return od_env["my_height"] > height > od_env[
-        "lowest_obstacle_height"
-    ] and dist < get_max_obstacle_distance(od_env)
+def is_obstacle(od_env, height, dist, lateral_dist):
+    return (
+        lateral_dist < 150
+        and od_env["my_height"] > height > od_env["lowest_obstacle_height"]
+        and dist < get_max_obstacle_distance(od_env)
+    )
+
+
+def is_safe_area(od_env, height):
+    return od_env["lowest_obstacle_height"] > height > od_env["highest_hole_height"]
 
 
 def init_detect_points(od_env, img_height, img_width, area, spilt_count=60):
+    global max_obstacle_dist
+    max_obstacle_dist = get_max_obstacle_distance(od_env)
+
     area = np.array(od_env["area"], np.int32)
     detect_points = []
 
     for y in range(0, int(img_height / spilt_count) + 2):
         temp = []
         for x in range(0, int(img_width / spilt_count) + 2):
-            global alarm
-            alarm = True
             color_pixel = (x * spilt_count, y * spilt_count)
             if cv2.pointPolygonTest(area, color_pixel, False) == -1:
                 continue
@@ -49,6 +57,8 @@ def is_warning(warning_preset, distance, message, frequency):
         dist, interval, string = preset["distance"], preset["interval"], preset["name"]
 
         if distance < dist:
+            global alarm
+            alarm = True
             Alarm.instance.start(message.format(distance, string), interval, frequency)
             return True
     return False

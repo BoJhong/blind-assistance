@@ -26,7 +26,7 @@ def draw_detections(
             label = category[class_id]
             caption = f"{label} {int(score * 100)}%"
             if depth_data is not None:
-                distance = get_middle_dist(det_img, box, depth_data, 12)
+                distance = get_middle_dist(det_img, box, depth_data, 3)
                 if distance != -1:
                     distance = str(distance / 1000)[:4]
                     caption += f" ({distance}m)"

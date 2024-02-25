@@ -44,7 +44,7 @@ def draw_elevation_view_points(image, elevation_view_points):
     points = []
     x, y = camera_center
     for point in elevation_view_points:
-        height, dist, depth_point = point
+        height, dist, lateral_dist, depth_point = point
         elevation = np.arctan2(depth_point[1], depth_point[2])
         point = rotate(
             camera_center,

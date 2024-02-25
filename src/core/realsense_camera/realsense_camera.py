@@ -61,15 +61,17 @@ class RealsenseCamera:
 
         # 計算角度（俯仰角和偏航角）
         elevation = np.arctan2(depth_point[1], depth_point[2])
+        azimuth = np.arctan2(depth_point[0], depth_point[2])
         pitch_angle_radians = math.radians(self.pitch + 90) - elevation
 
         # 距離計算攝影機到點的水平距離
         horizontal_distance = dist * math.cos(pitch_angle_radians)
 
         # 使用三角函數計算高低差
-        height = horizontal_distance * math.tan(pitch_angle_radians) / 10 + base_height
+        height = dist * math.sin(pitch_angle_radians) / 10 + base_height
+        lateral_distance = abs(horizontal_distance * math.sin(azimuth))
 
-        return height, int(horizontal_distance), depth_point
+        return height, int(horizontal_distance), int(lateral_distance), depth_point
 
     def project_color_pixel_to_depth_pixel(
         self, data: np.ndarray, from_pixel: Tuple[int, int]
@@ -112,7 +114,7 @@ class RealsenseCamera:
             and img_height > world_point[1] > 0
             and (self.pitch < -90 or self.pitch > 90)
         ):
-            height, dist, depth_point = self.depth_pixel_to_height(
+            height, dist, lateral_dist, depth_point = self.depth_pixel_to_height(
                 depth_image, world_point, 0
             )
             camera_height = round(-height)
