@@ -3,8 +3,8 @@ from typing import Tuple
 import cv2
 import numpy as np
 
-from .. import TOMLConfig
-from ..realsense_camera.utils import get_middle_dist
+from src.core.realsense_camera.utils import get_middle_dist
+from src.core.toml_config import TOMLConfig
 
 
 def draw_detections(

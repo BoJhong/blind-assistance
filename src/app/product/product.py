@@ -3,22 +3,23 @@ from threading import Thread
 
 import numpy as np
 
-from src.core import (
-    TOMLConfig,
-    Yolov8SahiDetectionModel,
-    RealsenseCamera,
-    DetectObstacle,
-    Alarm,
+from src.core.alarm.alarm import Alarm
+from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
     DetectCrosswalkSignal,
 )
+from src.core.detect_obstacle.detect_obstacle import DetectObstacle
+from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
+from src.core.realsense_camera.realsense_camera import RealsenseCamera
+from src.core.toml_config import TOMLConfig
 from src.utils.detect_blur import detect_blur_fft
 
-setting = TOMLConfig(os.path.join(__file__, "../config.toml"))
-rs_camera = RealsenseCamera()
-yolov8_sahi = Yolov8SahiDetectionModel(setting.env["yolo"]["cs_model"])
-detect_obstacle = DetectObstacle()
-alarm = Alarm()
-detect_cs = DetectCrosswalkSignal()
+config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
+
+rs_camera = RealsenseCamera(config)
+yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
+detect_obstacle = DetectObstacle(config)
+alarm = Alarm(config)
+detect_cs = DetectCrosswalkSignal(config)
 
 last_process_frame = 0
 blurry = False

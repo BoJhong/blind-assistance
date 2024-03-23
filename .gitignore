@@ -1,5 +1,7 @@
 *.pyc
-models/*
+.vscode/
+models/
+site-packages/
 config.toml
 .env
 .DS_Store

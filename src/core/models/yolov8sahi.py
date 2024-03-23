@@ -5,7 +5,7 @@ from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
 from ultralytics import YOLO
 
-from .base import DetectionModel
+from src.core.models.base import DetectionModel
 
 
 class Yolov8SahiDetectionModel(DetectionModel):

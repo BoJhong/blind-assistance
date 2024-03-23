@@ -8,9 +8,6 @@ import requests
 from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
 from src.core.toml_config import TOMLConfig
 
-windowName = "Image Test"
-cv2.namedWindow(windowName, cv2.WINDOW_AUTOSIZE)
-
 config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
 yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
 
@@ -25,9 +22,10 @@ img = imutils.resize(img, height=720)
 
 object_exists, prediction_list = yolov8_sahi(img)
 if object_exists is not None:
-    combined_img = yolov8_sahi.draw_detections(img, prediction_list)
-    cv2.imshow(windowName, combined_img)
+    for prediction in prediction_list:
+        class_id, box, score = prediction
+        print(f"Class ID: {class_id}, Box: {box}, Score: {score}")
 else:
-    cv2.imshow(windowName, img)
+    pass
 
 key = cv2.waitKey()

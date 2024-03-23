@@ -5,17 +5,15 @@ import imutils
 import numpy as np
 import pyrealsense2 as rs
 
-from src.core import (
-    TOMLConfig,
-    Yolov8DetectionModel,
-    Yolov8SahiDetectionModel,
-    RealsenseCamera,
-    DetectObstacle,
-    Alarm,
+from src.core.alarm.alarm import Alarm
+from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
     DetectCrosswalkSignal,
 )
+from src.core.detect_obstacle.detect_obstacle import DetectObstacle
+from src.core.realsense_camera.realsense_camera import RealsenseCamera
+from src.core.toml_config import TOMLConfig
 
-config = TOMLConfig(os.path.join(__file__, "../config.toml"))
+config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
 
 rs_setting = rs.config()
 rs_setting.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
@@ -24,8 +22,6 @@ rs_setting.enable_stream(rs.stream.accel)
 rs_setting.enable_stream(rs.stream.gyro)
 rs_camera = RealsenseCamera(config, rs_setting)
 
-yolov8 = Yolov8DetectionModel(config, config.env["yolo"]["model"])
-yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
 detect_obstacle = DetectObstacle(config)
 alarm = Alarm(config)
 detect_cs = DetectCrosswalkSignal(config)

@@ -9,9 +9,13 @@ class TOMLConfig:
 
     def __init__(self, file):
         TOMLConfig.instance = self
-        with open(os.path.join(os.getcwd(), file), "r", encoding="utf-8") as f:
+        with open(file, "r", encoding="utf-8") as f:
             self.env = toml.load(f)
         self.file = file
+
+    def load(self):
+        with open(self.file, "r", encoding="utf-8") as f:
+            self.env = toml.load(f)
 
     def update(self, new_config):
         with open(self.file, "r") as f:

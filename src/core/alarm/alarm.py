@@ -15,7 +15,6 @@ class Alarm:
         Alarm.instance = self
 
         self.alarm_env = config.env["alarm"]
-
         self.message = "警報！"
         self.duration = 1
         self.frequency = 2500

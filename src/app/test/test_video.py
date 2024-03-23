@@ -4,9 +4,15 @@ import cv2
 import imutils
 from cap_from_youtube import cap_from_youtube
 
-from src.core import TOMLConfig, Yolov8SahiDetectionModel, Alarm, DetectCrosswalkSignal
+from src.core.alarm.alarm import Alarm
+from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
+    DetectCrosswalkSignal,
+)
+from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
+from src.core.toml_config import TOMLConfig
 
-config = TOMLConfig(os.path.join(__file__, "../config.toml"))
+config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
+
 yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
 alarm = Alarm(config)
 detect_cs = DetectCrosswalkSignal(config)
