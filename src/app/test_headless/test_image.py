@@ -24,7 +24,8 @@ object_exists, prediction_list = yolov8_sahi(img)
 if object_exists is not None:
     for prediction in prediction_list:
         class_id, box, score = prediction
-        print(f"Class ID: {class_id}, Box: {box}, Score: {score}")
+        label = yolov8_sahi.category[class_id]
+        print(f"Class Name: {label}, Box: {box}, Score: {score}")
 else:
     pass
 
