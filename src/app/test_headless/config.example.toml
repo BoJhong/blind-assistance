@@ -1,7 +1,8 @@
 [config]
 debug = true # 除錯模式
 image = "img/images.jpg"
-video = "https://youtu.be/hdhc03RoTZY?feature=shared"
+video = "video/行人輔助交通號誌.mp4"
+skip_frame = 10  # 跳過幾幀
 
 [alarm]
 print = true          # 印出警告訊息

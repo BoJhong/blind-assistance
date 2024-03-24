@@ -2,6 +2,7 @@
 debug = true # 除錯模式
 image = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSY9C2RHWzywJ-UWqQcb7-wf6xYnV_VEKKB3w&usqp=CAU"
 video = "https://youtu.be/hdhc03RoTZY?feature=shared"
+skip_frame = 10  # 跳過幾幀
 
 [alarm]
 print = true          # 印出警告訊息

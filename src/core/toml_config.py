@@ -1,6 +1,4 @@
 import collections.abc
-import os
-
 import toml
 
 

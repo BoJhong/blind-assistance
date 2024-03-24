@@ -44,7 +44,7 @@ while cap.isOpened() and cv2.getWindowProperty(windowName, cv2.WND_PROP_VISIBLE)
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             count = 0
             continue
-        count += 10
+        count += config.env["config"]["skip_frame"]
         cap.set(cv2.CAP_PROP_POS_FRAMES, count)
 
     object_exists, prediction_list = yolov8_sahi(frame)
