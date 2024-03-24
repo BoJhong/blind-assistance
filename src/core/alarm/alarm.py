@@ -2,7 +2,7 @@ import threading
 import time
 from typing import Any
 
-import winsound
+# import winsound
 
 from .pitches import pitches
 
@@ -30,7 +30,7 @@ class Alarm:
             # self.pwm.start(frequency)
             if self.alarm_env["windows_sound"]:
                 threading.Thread(
-                    target=winsound.Beep, args=(frequency, int(duration * 1000))
+                    # target=winsound.Beep, args=(frequency, int(duration * 1000))
                 ).start()
             time.sleep(duration)  # 聲音持續時間
             # pwm.stop()
