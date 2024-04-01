@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any
 import numpy as np
 
 from .utils import draw_detections
+from ..realsense_camera.utils import get_middle_dist
 
 
 class DetectionModel:
@@ -68,3 +69,20 @@ class DetectionModel:
         return draw_detections(
             image, prediction_list, self.category, self.colors, depth_data, mask_alpha
         )
+
+    def print_detections(
+            self,
+            image: np.ndarray,
+            prediction_list: any,
+            depth_image: np.ndarray = None
+    ):
+        """
+        繪製預測結果
+        :param image: 原始圖片
+        :param prediction_list: 預測結果
+        :param depth_image: 深度資料
+        """
+        for prediction in prediction_list:
+            class_id, box, score = prediction
+            label = self.category[class_id]
+            print(f"Class Name: {label}, Box: {box}, Score: {score}, Depth: {get_middle_dist(image, box, depth_image, 3)}")

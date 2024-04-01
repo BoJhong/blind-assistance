@@ -76,7 +76,6 @@ class DetectObstacle:
                 640,
                 480,
             )
-            
 
         index = -1
         elevation_view_points = []
