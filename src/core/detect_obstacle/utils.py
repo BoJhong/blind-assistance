@@ -3,17 +3,19 @@ import math
 import cv2
 import numpy as np
 
-from ..alarm.alarm import Alarm
+from src.core.alarm.alarm import Alarm
 
 alarm = False
 max_obstacle_dist = 0
 
 
-def is_hole(od_env, height, lateral_dist):
+# 是否為有效的坑洞
+def is_hole(od_env, height: int, lateral_dist: float):
     return lateral_dist < 150 and height < od_env["highest_hole_height"]
 
 
-def is_obstacle(od_env, height, dist, lateral_dist):
+# 是否為有效的障礙物
+def is_obstacle(od_env, height: int, dist: float, lateral_dist: float):
     return (
         lateral_dist < 150
         and od_env["my_height"] > height > od_env["lowest_obstacle_height"]
@@ -21,10 +23,12 @@ def is_obstacle(od_env, height, dist, lateral_dist):
     )
 
 
+# 是否為有效的安全區域
 def is_safe_area(od_env, height):
     return od_env["lowest_obstacle_height"] > height > od_env["highest_hole_height"]
 
 
+# 初始化偵測點
 def init_detect_points(od_env, img_height, img_width, area, spilt_count=60):
     global max_obstacle_dist
     max_obstacle_dist = get_max_obstacle_distance(od_env)
@@ -43,6 +47,7 @@ def init_detect_points(od_env, img_height, img_width, area, spilt_count=60):
     return detect_points
 
 
+# 處理消失點（通常會是過遠、過近導致無法取得距離的偵測點）
 def process_missing_points(missing_points_buffer):  # 消失點防抖處理
     for mp in missing_points_buffer[0]:
         if all(mp in _ for _ in missing_points_buffer):
@@ -50,6 +55,7 @@ def process_missing_points(missing_points_buffer):  # 消失點防抖處理
     return -1
 
 
+# 是否需要警報
 def is_warning(warning_preset, distance, message, frequency):
     if distance == math.inf:
         return False
@@ -64,10 +70,12 @@ def is_warning(warning_preset, distance, message, frequency):
     return False
 
 
-def get_max_obstacle_distance(od_env):  # 取得最遠距離的障礙物判斷標準
+# 取得最遠距離的障礙物判斷標準
+def get_max_obstacle_distance(od_env):
     return od_env["obstacle_preset"][-1]["distance"]
 
 
+# 繪製方塊
 def draw_square(image, pixel, color, thickness=1, size=30):
     return cv2.rectangle(
         image,
@@ -78,10 +86,12 @@ def draw_square(image, pixel, color, thickness=1, size=30):
     )
 
 
+# 繪製圓形
 def draw_circle(image, pixel, color, thickness=1):
     return cv2.circle(image, pixel, 3, color, -1)
 
 
+# 繪製文字
 def draw_text(image, text, pixel, color, font_scale=0.5, thickness=1):
     font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -100,7 +110,13 @@ def draw_text(image, text, pixel, color, font_scale=0.5, thickness=1):
     )
 
 
-def alert(od_env, min_hole_distance, min_obstacle_distance, missing_point=None):
+# 開始警報
+def alert(
+    od_env,
+    min_hole_distance: float,
+    min_obstacle_distance: float,
+    missing_point: int = None,
+):
     global alarm
     if missing_point is not None and missing_point != -1:
         alarm = True

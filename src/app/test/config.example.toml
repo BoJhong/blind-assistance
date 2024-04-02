@@ -9,7 +9,7 @@ print = true          # 印出警告訊息
 windows_sound = true  # 播放Windows警告音效
 
 [detect_crosswalk_signal]
-invalid_time = 10  # 無效時間(秒)
+invalid_time = 3  # 無效時間(秒)
 
 [realsense]
 depth_min = 0.11  # 深度攝影機最近深度距離

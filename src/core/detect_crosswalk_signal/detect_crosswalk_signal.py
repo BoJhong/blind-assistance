@@ -34,6 +34,7 @@ class DetectCrosswalkSignal:
         if self.is_alarm:
             return
 
+        # 找出最接近畫面中心和最近的行人號誌
         found, nearest_object = find_nearest(image, prediction_list, names)
 
         if not found:
@@ -57,6 +58,9 @@ class DetectCrosswalkSignal:
         return box
 
     def alert(self):
+        """
+        播放警示音效
+        """
         if self.signal_status == SignalStatus.NONE:
             return
 
@@ -72,6 +76,12 @@ class DetectCrosswalkSignal:
         threading.Thread(target=self.play_notes, args=notes).start()
 
     def draw_line(self, image, box):
+        """
+        在偵測到的行人號誌與畫面中心點繪製一條線
+        :param image: 圖片
+        :param box: 行人號誌的框
+        :return image: 畫上行人號誌的線的圖片
+        """
         image = image.copy()
         img_height, img_width = image.shape[:2]
         color = (0, 0, 255) if self.signal_status == SignalStatus.RED else (0, 255, 0)
@@ -84,7 +94,9 @@ class DetectCrosswalkSignal:
         )
 
     def invalid(self):
-        """無法辨識行人號誌時，重置狀態"""
+        """
+        無法辨識行人號誌時，重置狀態
+        """
         if self.signal_status == SignalStatus.NONE:
             return
 

@@ -17,11 +17,10 @@ detect_cs = DetectCrosswalkSignal(config)
 
 config_env = config.env["config"]
 
-
 if config_env["video"].startswith("http"):
     cap = cap_from_youtube(config_env["video"], resolution="720p")
 else:
-    cap = cv2.VideoCapture(config_env["video"])
+    cap = cv2.VideoCapture(os.path.join(os.path.dirname(__file__), config_env["video"]))
 
 count = 0
 

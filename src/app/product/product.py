@@ -1,6 +1,7 @@
+import sys
+sys.path.append('../../../src')
 import os
 from threading import Thread
-
 import numpy as np
 
 from src.core.alarm.alarm import Alarm
@@ -78,6 +79,8 @@ try:
 
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
+
+        bottom_point = rs_camera.auto_camera_height(depth_frame)
 
         detect_obstacle(depth_frame, color_image)
 

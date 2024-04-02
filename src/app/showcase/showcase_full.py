@@ -35,7 +35,7 @@ finished = True
 frame_number = 0
 
 
-def slow_processing(image, n):
+def slow_processing(image, depth_image, n):
     global blurry, last_process_frame, finished
     if not finished:
         return
@@ -91,6 +91,8 @@ try:
         if not motion:
             continue
 
+        bottom_point = rs_camera.auto_camera_height(depth_frame)
+
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
         depth_colormap = cv2.applyColorMap(
@@ -105,10 +107,13 @@ try:
         ) = detect_obstacle(depth_frame, color_image, depth_colormap)
 
         frame_number = frames.get_frame_number()
-        slow_processing(color_image, frame_number)
+        slow_processing(color_image, depth_image, frame_number)
 
         if dcs_img is None:
             dcs_img = color_image.copy()
+
+        if bottom_point:
+            combined_img = rs_camera.draw_bottom_point(combined_img, bottom_point)
 
         combined_depth_colormap = rs_camera.draw_motion(combined_depth_colormap)
         images = np.hstack(
@@ -122,8 +127,6 @@ try:
         if key & 0xFF == ord("q") or key == 27:
             cv2.destroyAllWindows()
             break
-        elif key & 0xFF == ord("h"):
-            rs_camera.auto_camera_height(depth_frame)
 finally:
     rs_camera.pipeline.stop()
     alarm.cleanup()

@@ -18,7 +18,7 @@ if config_env["image"].startswith("http"):
     np_arr = np.frombuffer(response, np.uint8)
     img = cv2.imdecode(np_arr, cv2.IMREAD_UNCHANGED)
 else:
-    img = cv2.imread(config_env["image"])
+    img = cv2.imread(os.path.join(os.path.dirname(__file__), config_env["image"]))
 
 img = imutils.resize(img, height=720)
 

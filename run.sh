@@ -13,16 +13,14 @@ if [ ! -d "src/app/${APP_TYPE}" ]; then
 fi
 
 if "$2"; then
-  script=$2
+  APP_SCRIPT=$2
 else
-  script=${APP_TYPE}
+  APP_SCRIPT=${APP_TYPE}
 fi
 
-if [ ! -f "src/app/${APP_TYPE}/${APP_TYPE}.py" ]; then
-  echo "找不到 ${APP_TYPE} 的 ${APP_TYPE}.py"
+if [ ! -f "src/app/${APP_TYPE}/${APP_SCRIPT}.py" ]; then
+  echo "找不到 ${APP_TYPE} 的 ${APP_SCRIPT}.py"
   exit
 fi
 
-export PYTHONPATH=$(pwd)
-
-python "./src/app/${APP_TYPE}/${APP_TYPE}.py"
+python3 -m "src/app/${APP_TYPE}/${APP_SCRIPT}.py"

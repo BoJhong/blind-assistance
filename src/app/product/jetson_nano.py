@@ -80,6 +80,8 @@ try:
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
 
+        bottom_point = rs_camera.auto_camera_height(depth_frame)
+
         detect_obstacle(depth_frame, color_image)
 
         frame_number = frames.get_frame_number()

@@ -1,6 +1,7 @@
 import math
 from typing import Tuple, Any
 
+import cv2
 import numpy as np
 import pyrealsense2 as rs
 
@@ -18,6 +19,11 @@ class RealsenseCamera:
     instance = None
 
     def __init__(self, config: Any, setting=None):
+        """
+        初始化RealSense相機
+        :param config: toml設定檔
+        :param setting: 深度攝影機設置
+        """
         RealsenseCamera.instance = self
 
         self.rs_env = config.env["realsense"]
@@ -40,21 +46,37 @@ class RealsenseCamera:
         ) = intrin_and_extrin(self.profile)
 
     def __exit__(self):
+        """
+        停止深度攝影機
+        """
         self.pipeline.stop()
 
     def combined_angle(self, frames):
+        """
+        計算深度攝影機的姿態
+        @param frames: 深度攝影機幀
+        """
         motion = get_motion(frames)
         if motion:
             self.pitch, self.yaw, self.roll = motion
             return motion
 
-    # 計算RGB像素點距離地板的高度
     def depth_pixel_to_height(
         self, depth_image: np.ndarray, depth_pixel: Tuple[int, int], base_height
     ):
+        """
+        計算RGB像素點距離地板的高度
+        :param depth_image: 深度圖片
+        :param depth_pixel: 深度像素點
+        :param base_height: 攝影機的基本高度
+        """
+        # 檢查像素是否在圖片內
         if not is_pixel_inside_image(depth_image, depth_pixel):
             return
+
+        # 從深度圖片中獲取深度
         dist = depth_image[depth_pixel[1], depth_pixel[0]]
+        # 將彩度圖像素點轉換為深度像素點
         depth_point = rs.rs2_deproject_pixel_to_point(
             self.depth_intrin, depth_pixel, dist
         )
@@ -69,9 +91,10 @@ class RealsenseCamera:
 
         # 使用三角函數計算高低差
         height = dist * math.sin(pitch_angle_radians) / 10 + base_height
+        # 計算橫向距離
         lateral_distance = abs(horizontal_distance * math.sin(azimuth))
 
-        return height, int(horizontal_distance), int(lateral_distance), depth_point
+        return height, int(abs(horizontal_distance)), int(lateral_distance), depth_point
 
     def project_color_pixel_to_depth_pixel(
         self, data: np.ndarray, from_pixel: Tuple[int, int]
@@ -95,32 +118,58 @@ class RealsenseCamera:
         return draw_motion(image, self.pitch, self.yaw, self.roll)
 
     def auto_camera_height(self, depth_frame):
+        """
+        自動設置攝影機高度
+        :param depth_frame: 深度幀
+        return: 像素座標
+        """
+
+        # 設置相對座標
         world_point = np.array([0, 0, 10])  # [前後, 左右, 上下]
+        # 使用攝影機姿態將相對座標轉換為世界座標
         world_point = np.dot(
             get_rotation_matrix(self.pitch, self.yaw, self.roll), world_point
         )
-        world_point = rs.rs2_project_point_to_pixel(
+        # 將世界座標轉換為畫面像素座標
+        pixel = rs.rs2_project_point_to_pixel(
             self.depth_intrin,
             world_point,
         )
-        if math.isnan(world_point[0]) or math.isnan(world_point[1]):
+
+        # 檢查世界座標是否為有效的數字
+        if math.isnan(pixel[0]) or math.isnan(pixel[1]):
             return
-        world_point = (round(world_point[1]), round(world_point[0]))
+        # 四捨五入世界座標
+        pixel = (round(pixel[1]), round(pixel[0]))
 
         depth_image = np.asanyarray(depth_frame.get_data())
         img_height, img_width = depth_image.shape[:2]
+
+        # 檢查像素點是否在圖片內，並且攝影機是否朝下
         if (
-            img_width > world_point[0] > 0
-            and img_height > world_point[1] > 0
+            img_width > pixel[0] > 0
+            and img_height > pixel[1] > 0
             and (self.pitch < -90 or self.pitch > 90)
         ):
+            # 計算像素點的高度
             height, dist, lateral_dist, depth_point = self.depth_pixel_to_height(
-                depth_image, world_point, 0
+                depth_image, pixel, 0
             )
+
+            # 將高度四捨五入並保存為攝影機高度
             camera_height = round(-height)
             TOMLConfig.instance.env["obstacle_detection"][
                 "camera_height"
             ] = camera_height
-            print(f"已將攝影機高度設置為: {camera_height}")
-        else:
-            print(f"請先將深度攝影機朝正下方看！")
+
+            # 回傳像素座標
+            return pixel
+
+    def draw_bottom_point(self, image, bottom_point):
+        return cv2.circle(
+            image,
+            bottom_point,
+            10,
+            (255, 255, 255),
+            -1
+        )

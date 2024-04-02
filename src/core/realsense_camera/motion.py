@@ -14,18 +14,18 @@ last_ts_gyro: float
 
 def get_motion(frames):
     global first, alpha, total_gyro_angle_y, accel_angle_z, accel_angle_x, accel_angle_y, last_ts_gyro
-    # gather IMU data
+    # 取得IMU資料
     accel = frames[2].as_motion_frame().get_motion_data()
     gyro = frames[3].as_motion_frame().get_motion_data()
 
     timestamp = frames.get_timestamp()
 
-    # calculation for the first frame
+    # 計算第一幀（防止缺失陀螺儀資料）
     if first:
         first = False
         last_ts_gyro = timestamp
 
-        # accelerometer calculation
+        # 計算加速度儀
         accel_angle_z = math.degrees(math.atan2(accel.y, accel.z))
         accel_angle_x = math.degrees(
             math.atan2(accel.x, math.sqrt(accel.y * accel.y + accel.z * accel.z))
@@ -34,9 +34,9 @@ def get_motion(frames):
 
         return
 
-    # calculation for the second frame onwards
+    # 從第二幀開始計算
 
-    # gyro meter calculations
+    # 陀螺儀計算
     dt_gyro = (timestamp - last_ts_gyro) / 1000
     last_ts_gyro = timestamp
 
@@ -53,7 +53,7 @@ def get_motion(frames):
     total_gyro_angle_y = accel_angle_y + dangleY + total_gyro_angle_y
     total_gyro_angle_z = accel_angle_z + dangleZ
 
-    # accelerometer calculation
+    # 加速度儀計算
     accel_angle_z = math.degrees(math.atan2(accel.y, accel.z))
     accel_angle_x = math.degrees(
         math.atan2(accel.x, math.sqrt(accel.y * accel.y + accel.z * accel.z))
@@ -61,7 +61,7 @@ def get_motion(frames):
     # accel_angle_y = math.degrees(math.pi)
     accel_angle_y = 0
 
-    # combining gyro meter and accelerometer angles
+    # 結合陀螺儀和加速度儀角度
     combined_angle_x = total_gyro_angle_x * alpha + accel_angle_x * (1 - alpha)
     combined_angle_z = total_gyro_angle_z * alpha + accel_angle_z * (1 - alpha)
     combined_angle_y = total_gyro_angle_y
@@ -74,6 +74,13 @@ def get_motion(frames):
 
 
 def draw_motion(image, pitch, yaw, roll):
+    """
+    顯示攝影機姿態
+    :param image: 原始圖片
+    :param pitch: 俯仰角（角度）
+    :param yaw: 偏航角（角度）
+    :param roll: 滾轉角（角度）
+    """
     image = image.copy()
     cv2.putText(
         image,

@@ -7,7 +7,7 @@ windows_sound = true  # 播放Windows警告音效
 
 [detect_crosswalk_signal]
 debug = false      # 除錯模式
-invalid_time = 10  # 無效時間(秒)
+invalid_time = 3  # 無效時間(秒)
 
 [obstacle_detection]
 my_height = 180                     # 身高

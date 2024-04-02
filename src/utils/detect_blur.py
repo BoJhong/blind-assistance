@@ -4,8 +4,7 @@ import numpy as np
 
 def detect_blur_fft(image, size=60, thresh=20):
     image = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2GRAY)
-    # grab the dimensions of the image and use the dimensions to
-    # derive the center (x, y)-coordinates
+    # 取得圖像的尺寸並推導出中心（x，y）坐標
     (h, w) = image.shape
     (cX, cY) = (int(w / 2.0), int(h / 2.0))
 

@@ -9,9 +9,11 @@ camera_pitch = 0
 
 def rotate(origin, point, angle):
     """
-    Rotate a point counterclockwise by a given angle around a given origin.
-
-    The angle should be given in radians.
+    將給定原點周圍的一個點逆時針旋轉一定角度
+    角度必須是弧度
+    :param origin: 原點
+    :param point: 點
+    :param angle: 角度
     """
     angle_radians = math.radians(angle)
     ox, oy = origin
@@ -22,7 +24,14 @@ def rotate(origin, point, angle):
     return qx, qy
 
 
-def draw_elevation_view(pitch, width, height):
+def draw_elevation_view(pitch: float, width: float, height: int):
+    """
+    繪製平視圖
+    :param pitch: 俯仰角（角度）
+    :param width: 寬度
+    :param height: 身高
+    :return:
+    """
     global camera_center, camera_pitch
     camera_pitch = pitch
     shape = (height, width, 3)
@@ -39,6 +48,12 @@ def draw_elevation_view(pitch, width, height):
 
 
 def draw_elevation_view_points(image, elevation_view_points):
+    """
+    繪製平視圖上的點
+    :param image: 平視圖
+    :param elevation_view_points: 平視圖上的點
+    :return:
+    """
     global camera_center, camera_pitch
     image = image.copy()
     points = []

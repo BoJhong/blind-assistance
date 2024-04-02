@@ -1,7 +1,7 @@
 [config]
 debug = true # 除錯模式
-image = "img/images.jpg"
-video = "video/行人輔助交通號誌.mp4"
+image = "resource/images.jpg"
+video = "resource/行人輔助交通號誌.mp4"
 skip_frame = 10  # 跳過幾幀
 
 [alarm]
@@ -9,7 +9,7 @@ print = true          # 印出警告訊息
 windows_sound = true  # 播放Windows警告音效
 
 [detect_crosswalk_signal]
-invalid_time = 10  # 無效時間(秒)
+invalid_time = 3  # 無效時間(秒)
 
 [realsense]
 depth_min = 0.11  # 深度攝影機最近深度距離

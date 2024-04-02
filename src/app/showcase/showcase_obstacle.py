@@ -57,6 +57,8 @@ try:
             cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET
         )
 
+        bottom_point = rs_camera.auto_camera_height(depth_frame)
+
         (
             combined_img,
             combined_depth_colormap,
@@ -65,10 +67,14 @@ try:
         ) = detect_obstacle(depth_frame, color_image, depth_colormap)
         safe_area_img = detect_obstacle.draw_border(color_image, border_img)
 
+        if bottom_point:
+            combined_img = rs_camera.draw_bottom_point(combined_img, bottom_point)
+
         combined_depth_colormap = rs_camera.draw_motion(combined_depth_colormap)
         images = np.hstack(
             (imutils.resize(combined_img, height=480), combined_depth_colormap)
         )
+
 
         cv2.imshow(window_name, images)
         cv2.imshow(safe_area_window_name, imutils.resize(safe_area_img, height=480))
@@ -78,8 +84,6 @@ try:
         if key & 0xFF == ord("q") or key == 27:
             cv2.destroyAllWindows()
             break
-        elif key & 0xFF == ord("h"):
-            rs_camera.auto_camera_height(depth_frame)
 finally:
     rs_camera.pipeline.stop()
     alarm.cleanup()

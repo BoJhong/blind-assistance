@@ -35,17 +35,16 @@ class DetectionModel:
 
     def load_model(self):
         """
-        這個函數的實現方式必須是初始化檢測模型並將其設定為self.model
-        （需要利用self.model_path、self.config_path和self.device）
+        載入檢測模型
+        （需要用到self.model_path、self.config_path和self.device）
         """
         raise NotImplementedError()
 
     def set_model(self, model: Any, **kwargs):
         """
-        這個函數的實現能夠從已載入的模型實例化一個DetectionModel
-        Args:
-            model: Any
-                已載入的模型
+        設置檢測模型
+        :param model: 檢測模型
+        :param kwargs: 額外的參數
         """
         raise NotImplementedError()
 
