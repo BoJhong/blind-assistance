@@ -2,9 +2,12 @@ import threading
 import time
 from typing import Any
 
-import winsound
+import RPi.GPIO as GPIO
 
 from .pitches import pitches
+
+
+# import winsound
 
 
 class Alarm:
@@ -19,8 +22,10 @@ class Alarm:
         self.duration = 1
         self.frequency = 2500
         self.loop = False
+        self.output_pin = 18
 
-        # self.pwm = buzzer.setup()
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.output_pin, GPIO.OUT, initial=GPIO.HIGH)
 
     def __exit__(self):
         self.cleanup()
@@ -29,11 +34,12 @@ class Alarm:
         def _():
             # self.pwm.start(frequency)
             if self.alarm_env["windows_sound"]:
-                threading.Thread(
-                    target=winsound.Beep, args=(frequency, int(duration * 1000))
-                ).start()
+                # threading.Thread(
+                #     target=winsound.Beep, args=(frequency, int(duration * 1000))
+                # ).start()
+                GPIO.output(self.output_pin, GPIO.HIGH)
             time.sleep(duration)  # 聲音持續時間
-            # pwm.stop()
+            GPIO.output(self.output_pin, GPIO.LOW)
 
         threading.Thread(target=_).start()
 
