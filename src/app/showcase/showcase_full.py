@@ -104,6 +104,7 @@ try:
             combined_depth_colormap,
             border_img,
             elevation_view_img,
+            heatmap,
         ) = detect_obstacle(depth_frame, color_image, depth_colormap)
 
         frame_number = frames.get_frame_number()
@@ -122,6 +123,7 @@ try:
 
         cv2.imshow(window_name, images)
         cv2.imshow(dcs_window_name, imutils.resize(dcs_img, height=480))
+        cv2.imshow("Heatmap", heatmap)
         key = cv2.waitKey(1)
 
         if key & 0xFF == ord("q") or key == 27:

@@ -18,6 +18,7 @@ from .utils import (
 )
 from ..alarm.alarm import Alarm
 from ..realsense_camera.realsense_camera import RealsenseCamera
+from ..realsense_camera.utils import is_pixel_inside_image
 
 
 class DetectObstacle:
@@ -79,6 +80,9 @@ class DetectObstacle:
 
         index = -1
         elevation_view_points = []
+
+        heatmap_data = np.zeros((len(self.detect_points), len(self.detect_points[0])))
+
         border_circle_size = 25 if img_height == 480 else 50
         for i in range(len(self.detect_points)):
             closest_point = None
@@ -111,11 +115,13 @@ class DetectObstacle:
                     # 如果高度低於最高坑洞的判斷標準，則代表有坑洞
                     if is_hole(self.do_env, height, lateral_dist):
                         color = (0, 0, 255)
+                        heatmap_data[i, j] = 1
                         if dist < min_hole_distance:
                             min_hole_distance = dist
                     # 如果高度低於身高，又高於最低障礙物的判斷標準，則代表有障礙物
                     elif is_obstacle(self.do_env, height, dist, lateral_dist):
                         color = (0, 255, 255)
+                        heatmap_data[i, j] = 0.5
                         if dist < min_obstacle_distance:
                             min_obstacle_distance = dist
                     elif debug and is_safe_area(self.do_env, height):
@@ -170,7 +176,18 @@ class DetectObstacle:
             alert(self.do_env, min_hole_distance, min_obstacle_distance, missing_point)
 
         if debug:
-            return color_img, depth_img, border_img, elevation_view_img
+            # 放大熱力圖資料
+            large_data = cv2.resize(heatmap_data, (img_width, img_height), interpolation=cv2.INTER_LINEAR)
+            large_data[0, 0] = 1
+            # 將資料轉換為8位元灰階影像
+            heatmap_data_normalized = cv2.normalize(large_data, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+            # 將灰階圖轉換為熱力圖
+            heatmap = cv2.applyColorMap(heatmap_data_normalized, cv2.COLORMAP_JET)
+            heatmap = cv2.addWeighted(heatmap, 0.2, np.zeros_like(heatmap), 0.8, 0)
+
+            heatmap = cv2.addWeighted(orig_color_img, 1, heatmap, 1, 0)
+
+            return color_img, depth_img, border_img, elevation_view_img, heatmap
 
     @staticmethod
     def draw_border(image, border_img, color=(0, 255, 0), mask_alpha: float = 0.2):
