@@ -40,16 +40,13 @@ def is_pixel_inside_image(image: np.ndarray, pixel: Tuple[int, int]) -> bool:
     return 0 <= pixel[0] < img_width and 0 <= pixel[1] < img_height
 
 
-def get_rotation_matrix(pitch: int, yaw: int, roll: int):
+def get_rotation_matrix(motion_radians: (int, int, int)):
     """
     取得攝影機姿態旋轉矩陣
-    :param pitch: 俯仰角（角度）
-    :param yaw: 偏航角（角度）
-    :param roll: 滾動角（角度）
+    :param motion_radians: 攝影機姿態（弧度）
     """
-    pitch = math.radians(pitch)
-    yaw = math.radians(0)
-    roll = math.radians(0)
+    pitch, yaw, roll = motion_radians
+    roll = -roll
     return np.array(
         [
             [

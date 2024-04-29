@@ -18,7 +18,6 @@ from .utils import (
 )
 from ..alarm.alarm import Alarm
 from ..realsense_camera.realsense_camera import RealsenseCamera
-from ..realsense_camera.utils import is_pixel_inside_image
 
 
 class DetectObstacle:
@@ -110,21 +109,27 @@ class DetectObstacle:
                 color = (0, 255, 0)
 
                 if dist > 0:
+                    is_safe = True
+
                     if closest_point is None or dist < closest_point[1]:
                         closest_point = result
+
                     # 如果高度低於最高坑洞的判斷標準，則代表有坑洞
                     if is_hole(self.do_env, height, lateral_dist):
+                        safe = False
                         color = (0, 0, 255)
                         heatmap_data[i, j] = 1
                         if dist < min_hole_distance:
                             min_hole_distance = dist
                     # 如果高度低於身高，又高於最低障礙物的判斷標準，則代表有障礙物
-                    elif is_obstacle(self.do_env, height, dist, lateral_dist):
+                    if is_obstacle(self.do_env, height, dist, lateral_dist):
+                        safe = False
                         color = (0, 255, 255)
                         heatmap_data[i, j] = 0.5
                         if dist < min_obstacle_distance:
                             min_obstacle_distance = dist
-                    elif debug and is_safe_area(self.do_env, height):
+
+                    if debug and is_safe and is_safe_area(self.do_env, height):
                         border_img = cv2.circle(border_img, color_pixel, 50, color, -1)
 
                 if debug:
@@ -177,10 +182,16 @@ class DetectObstacle:
 
         if debug:
             # 放大熱力圖資料
-            large_data = cv2.resize(heatmap_data, (img_width, img_height), interpolation=cv2.INTER_LINEAR)
+            large_data = cv2.resize(
+                heatmap_data, (img_width, img_height), interpolation=cv2.INTER_LINEAR
+            )
             large_data[0, 0] = 1
+
             # 將資料轉換為8位元灰階影像
-            heatmap_data_normalized = cv2.normalize(large_data, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+            heatmap_data_normalized = cv2.normalize(
+                large_data, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U
+            )
+
             # 將灰階圖轉換為熱力圖
             heatmap = cv2.applyColorMap(heatmap_data_normalized, cv2.COLORMAP_JET)
             heatmap = cv2.addWeighted(heatmap, 0.2, np.zeros_like(heatmap), 0.8, 0)

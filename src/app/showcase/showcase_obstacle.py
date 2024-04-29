@@ -57,13 +57,14 @@ try:
             cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET
         )
 
-        bottom_point = rs_camera.auto_camera_height(depth_frame)
+        bottom_point, camera_height = rs_camera.auto_camera_height(depth_frame)
 
         (
             combined_img,
             combined_depth_colormap,
             border_img,
             elevation_view_img,
+            heatmap,
         ) = detect_obstacle(depth_frame, color_image, depth_colormap)
         safe_area_img = detect_obstacle.draw_border(color_image, border_img)
 
@@ -75,15 +76,19 @@ try:
             (imutils.resize(combined_img, height=480), combined_depth_colormap)
         )
 
-
         cv2.imshow(window_name, images)
         cv2.imshow(safe_area_window_name, imutils.resize(safe_area_img, height=480))
         cv2.imshow(ev_window_name, elevation_view_img)
+        cv2.imshow("Heatmap", imutils.resize(heatmap, height=480))
         key = cv2.waitKey(1)
 
         if key & 0xFF == ord("q") or key == 27:
             cv2.destroyAllWindows()
             break
+        if key & 0xFF == ord("s") and camera_height:
+            TOMLConfig.instance.env["obstacle_detection"][
+                "camera_height"
+            ] = camera_height
 finally:
     rs_camera.pipeline.stop()
     alarm.cleanup()

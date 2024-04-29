@@ -76,7 +76,7 @@ try:
         if not motion:
             continue
 
-        bottom_point = rs_camera.auto_camera_height(depth_frame)
+        bottom_point, camera_height = rs_camera.auto_camera_height(depth_frame)
 
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
@@ -100,6 +100,10 @@ try:
         if key & 0xFF == ord("q") or key == 27:
             cv2.destroyAllWindows()
             break
+        if key & 0xFF == ord("s") and camera_height:
+            TOMLConfig.instance.env["obstacle_detection"][
+                "camera_height"
+            ] = camera_height
 finally:
     rs_camera.pipeline.stop()
     alarm.cleanup()

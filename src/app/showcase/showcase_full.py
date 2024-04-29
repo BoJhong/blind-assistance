@@ -13,7 +13,7 @@ from src.core.detect_obstacle.detect_obstacle import DetectObstacle
 from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
 from src.core.toml_config import TOMLConfig
-from src.utils.detect_blur import detect_blur_fft, draw_blur_status
+from src.utils.detect_blur import draw_blur_status
 
 config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
 rs_camera = RealsenseCamera(config)
@@ -41,13 +41,13 @@ def slow_processing(image, depth_image, n):
         return
 
     mean = None
-    if detect_cs.is_none():
-        if n % 15 != 0 and not blurry:
-            return
-
-        (mean, blurry) = detect_blur_fft(image)
-        if blurry and n // 15 - last_process_frame < 5:
-            return
+    # if detect_cs.is_none():
+    #     if n % 15 != 0 and not blurry:
+    #         return
+    #
+    #     (mean, blurry) = detect_blur_fft(image)
+    #     if blurry and n // 15 - last_process_frame < 5:
+    #         return
 
     last_process_frame = n // 15
     finished = False
@@ -91,7 +91,7 @@ try:
         if not motion:
             continue
 
-        bottom_point = rs_camera.auto_camera_height(depth_frame)
+        bottom_point, camera_height = rs_camera.auto_camera_height(depth_frame)
 
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
@@ -114,7 +114,9 @@ try:
             dcs_img = color_image.copy()
 
         if bottom_point:
-            combined_img = rs_camera.draw_bottom_point(combined_img, bottom_point)
+            combined_depth_colormap = rs_camera.draw_bottom_point(
+                combined_depth_colormap, bottom_point
+            )
 
         combined_depth_colormap = rs_camera.draw_motion(combined_depth_colormap)
         images = np.hstack(
@@ -123,12 +125,16 @@ try:
 
         cv2.imshow(window_name, images)
         cv2.imshow(dcs_window_name, imutils.resize(dcs_img, height=480))
-        cv2.imshow("Heatmap", heatmap)
+        cv2.imshow("Heatmap", imutils.resize(heatmap, height=480))
         key = cv2.waitKey(1)
 
         if key & 0xFF == ord("q") or key == 27:
             cv2.destroyAllWindows()
-            break
+
+        if key & 0xFF == ord("s") and camera_height:
+            TOMLConfig.instance.env["obstacle_detection"][
+                "camera_height"
+            ] = camera_height
 finally:
     rs_camera.pipeline.stop()
     alarm.cleanup()

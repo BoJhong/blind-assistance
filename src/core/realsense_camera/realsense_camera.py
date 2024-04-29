@@ -12,7 +12,6 @@ from src.core.realsense_camera.utils import (
     intrin_and_extrin,
     default_setting,
 )
-from src.core.toml_config import TOMLConfig
 
 
 class RealsenseCamera:
@@ -45,6 +44,14 @@ class RealsenseCamera:
             self.color_to_depth_extrin,
         ) = intrin_and_extrin(self.profile)
 
+    @property
+    def motion(self):
+        return self.pitch, self.yaw, self.roll
+
+    @property
+    def motion_radians(self):
+        return math.radians(self.pitch), math.radians(self.yaw), math.radians(self.roll)
+
     def __exit__(self):
         """
         停止深度攝影機
@@ -56,10 +63,10 @@ class RealsenseCamera:
         計算深度攝影機的姿態
         @param frames: 深度攝影機幀
         """
-        motion = get_motion(frames)
-        if motion:
-            self.pitch, self.yaw, self.roll = motion
-            return motion
+        camera_motion = get_motion(frames)
+        if camera_motion:
+            self.pitch, self.yaw, self.roll = camera_motion
+            return camera_motion
 
     def depth_pixel_to_height(
         self, depth_image: np.ndarray, depth_pixel: Tuple[int, int], base_height
@@ -127,9 +134,7 @@ class RealsenseCamera:
         # 設置相對座標
         world_point = np.array([0, 0, 10])  # [前後, 左右, 上下]
         # 使用攝影機姿態將相對座標轉換為世界座標
-        world_point = np.dot(
-            get_rotation_matrix(self.pitch, self.yaw, self.roll), world_point
-        )
+        world_point = np.dot(get_rotation_matrix(self.motion_radians), world_point)
         # 將世界座標轉換為畫面像素座標
         pixel = rs.rs2_project_point_to_pixel(
             self.depth_intrin,
@@ -158,18 +163,10 @@ class RealsenseCamera:
 
             # 將高度四捨五入並保存為攝影機高度
             camera_height = round(-height)
-            TOMLConfig.instance.env["obstacle_detection"][
-                "camera_height"
-            ] = camera_height
 
             # 回傳像素座標
-            return pixel
+            return pixel, camera_height
+        return None, None
 
     def draw_bottom_point(self, image, bottom_point):
-        return cv2.circle(
-            image,
-            bottom_point,
-            10,
-            (255, 255, 255),
-            -1
-        )
+        return cv2.circle(image, bottom_point, 10, (255, 255, 255), -1)
