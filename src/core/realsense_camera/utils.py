@@ -89,6 +89,7 @@ def get_middle_dist(image: np.ndarray, box, depth_data, rand_num):
         bias = random.randint(-min_val // 4, min_val // 4)
         color_pixel = mid_pos[1] + bias, mid_pos[0] + bias
         depth_pixel = project_color_pixel_to_depth_pixel(depth_data, image, color_pixel)
+
         if not is_pixel_inside_image(depth_data, depth_pixel):
             continue
 
@@ -104,5 +105,5 @@ def get_middle_dist(image: np.ndarray, box, depth_data, rand_num):
 
     if len(distance_list) > 0:
         return np.mean(distance_list)
-    else:
-        return -1
+
+    return -1

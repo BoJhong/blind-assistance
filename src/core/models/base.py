@@ -14,7 +14,7 @@ class DetectionModel:
         config: Any,
         model_path: str,
         confidence_threshold: float = 0.3,
-        category_mapping: Optional[Dict] = None,
+        category_mapping: Any = None,
         load_at_init: bool = True,
     ):
         """

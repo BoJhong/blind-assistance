@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Any, Optional, Dict
 
 import cv2
 import numpy as np
@@ -8,8 +8,13 @@ from src.core.toml_config import TOMLConfig
 
 
 def draw_detections(
-    image, prediction_list, category, colors, depth_data=None, mask_alpha=0.3
-):
+    image: np.ndarray,
+    prediction_list: Any,
+    category: Any,
+    colors: Any,
+    depth_data=None,
+    mask_alpha=0.3
+) -> np.ndarray:
     det_img = image.copy()
 
     img_height, img_width = image.shape[:2]
@@ -22,16 +27,20 @@ def draw_detections(
     for class_id, box, score in prediction_list:
         color = colors[class_id]
         draw_box(det_img, box, color)
-        if TOMLConfig.instance.env["config"]["debug"]:
-            label = category[class_id]
-            caption = f"{label} {int(score * 100)}%"
-            if depth_data is not None:
-                distance = get_middle_dist(det_img, box, depth_data, 3)
-                if distance != -1:
-                    distance = str(distance / 1000)[:4]
-                    caption += f" ({distance}m)"
 
-            draw_text(det_img, caption, box, color, font_size, text_thickness)
+        # 如果debug模式為關閉狀態，則不顯示標籤，只顯示框線
+        if not TOMLConfig.instance.env["config"]["debug"]:
+            continue
+
+        label = category[class_id]
+        caption = f"{label} {int(score * 100)}%"
+        if depth_data is not None:
+            distance = get_middle_dist(det_img, box, depth_data, 6)
+            if distance != -1:
+                distance = str(distance / 1000)[:4]
+                caption += f" ({distance}m)"
+
+        draw_text(det_img, caption, box, color, font_size, text_thickness)
 
     return det_img
 
