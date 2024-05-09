@@ -40,7 +40,7 @@ def slow_processing(image):
 
     finished = False
 
-    def _():
+    def fn():
         global dcs_img, finished
         img = image.copy()
 
@@ -57,7 +57,7 @@ def slow_processing(image):
 
         dcs_img = img
 
-    Thread(target=_).start()
+    Thread(target=fn).start()
 
 
 try:

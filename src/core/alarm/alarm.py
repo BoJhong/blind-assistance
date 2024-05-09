@@ -26,7 +26,7 @@ class Alarm:
         self.cleanup()
 
     def play_sound(self, frequency: int = 2500, duration: float = 1):
-        def _():
+        def fn():
             # self.pwm.start(frequency)
             if self.alarm_env["windows_sound"]:
                 threading.Thread(
@@ -35,7 +35,7 @@ class Alarm:
             time.sleep(duration)  # 聲音持續時間
             # pwm.stop()
 
-        threading.Thread(target=_).start()
+        threading.Thread(target=fn).start()
 
     def start(self, message: str = "警報！", duration: float = 1, frequency: int = 2500):
         self.duration = duration

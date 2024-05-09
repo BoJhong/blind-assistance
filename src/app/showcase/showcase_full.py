@@ -52,7 +52,7 @@ def slow_processing(image, depth_image, n):
     last_process_frame = n // 15
     finished = False
 
-    def _():
+    def fn():
         global dcs_img, blurry, frame_number, finished
         img = image.copy()
 
@@ -72,7 +72,7 @@ def slow_processing(image, depth_image, n):
 
         dcs_img = img
 
-    Thread(target=_).start()
+    Thread(target=fn).start()
 
 
 try:

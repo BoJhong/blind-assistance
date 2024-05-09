@@ -48,7 +48,7 @@ def slow_processing(c_image, d_image, n):
     last_process_frame = n // 15
     finished = False
 
-    def _():
+    def fn():
         global finished
 
         object_exists, prediction_list = yolov8(c_image)
@@ -60,7 +60,7 @@ def slow_processing(c_image, d_image, n):
         else:
             detect_cs.invalid()
 
-    slow_thread = Thread(target=_)
+    slow_thread = Thread(target=fn)
     slow_thread.start()
 
 
