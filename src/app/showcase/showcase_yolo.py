@@ -1,5 +1,6 @@
 import os
 from threading import Thread
+from collections import defaultdict
 
 import cv2
 import imutils
@@ -32,8 +33,9 @@ cv2.namedWindow(od_window_name, cv2.WINDOW_AUTOSIZE)
 dcs_img = None
 finished = True
 
+track_history = defaultdict(lambda: [])
 
-def slow_processing(image):
+def slow_processing(image, depth_image):
     global finished
     if not finished:
         return
@@ -81,13 +83,20 @@ try:
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
 
-        slow_processing(color_image)
+        slow_processing(color_image, depth_image)
 
         if dcs_img is None:
             dcs_img = color_image.copy()
 
         yolov8_img = color_image.copy()
-        object_exists, prediction_list = yolov8(color_image)
+        object_exists, prediction_list = yolov8(color_image, track_history)
+
+        # for track_id in track_history:
+        #     for box in track_history[track_id]:
+        #         x, y, w, h = box
+        #         center = (int(x + w / 2), int(y + h / 2))
+        #         yolov8_img = cv2.circle(yolov8_img, center, 2, (0, 0, 255), -1)
+
         if object_exists:
             yolov8_img = yolov8.draw_detections(
                 yolov8_img, prediction_list, depth_image

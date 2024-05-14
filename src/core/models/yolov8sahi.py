@@ -50,10 +50,11 @@ class Yolov8SahiDetectionModel(DetectionModel):
         for result in prediction_list:
             try:
                 data = result.get_shifted_object_prediction()
-                class_id, box, score = (
+                class_id, box, score, track_id = (
                     data.category.id,
                     np.array(data.bbox.to_xyxy(), dtype=np.float32),
                     data.score.value,
+                    -1
                 )
                 if score < self.confidence_threshold:
                     continue

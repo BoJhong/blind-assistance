@@ -24,7 +24,7 @@ def draw_detections(
     det_img = draw_masks(det_img, prediction_list, colors, mask_alpha)
 
     # Draw bounding boxes and labels of detections
-    for class_id, box, score in prediction_list:
+    for class_id, box, score, track_id in prediction_list:
         color = colors[class_id]
         draw_box(det_img, box, color)
 
@@ -33,9 +33,12 @@ def draw_detections(
             continue
 
         label = category[class_id]
-        caption = f"{label} {int(score * 100)}%"
+        caption = f"ID: {track_id} {label} {int(score * 100)}%"
+
+        # 如果有深度數據，則繪製距離
         if depth_data is not None:
-            distance = get_middle_dist(det_img, box, depth_data, 6)
+            distance = get_middle_dist(det_img, box, depth_data, 24)
+
             if distance != -1:
                 distance = str(distance / 1000)[:4]
                 caption += f" ({distance}m)"
@@ -92,7 +95,7 @@ def draw_masks(
     mask_img = image.copy()
 
     # Draw bounding boxes and labels of detections
-    for class_id, box, score in prediction_list:
+    for class_id, box, score, track_id in prediction_list:
         color = colors[class_id]
         x1, y1, x2, y2 = box.astype(int)
 
