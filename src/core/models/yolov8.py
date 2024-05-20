@@ -45,14 +45,16 @@ class Yolov8DetectionModel(DetectionModel):
                 class_id = int(result.boxes.cls[i].item())
                 box = result.boxes.xyxy[i].cpu().numpy()
                 score = float(result.boxes.conf[i].item())
-                track_id = -1
-                if result.boxes.id is not None:
-                    track_id = result.boxes.id[i].int().cpu().item()
-                    track = track_history[track_id]
+                track_id = 0
 
-                    track.append(box)  # x, y center point
-                    if len(track) > 30:  # retain 90 tracks for 90 frames
-                        track.pop(0)
+                if result.boxes.id is None:
+                    continue
+                track_id = result.boxes.id[i].int().cpu().item()
+                track = track_history[track_id]
+
+                track.append(box)  # x, y center point
+                if len(track) > 30:  # retain 90 tracks for 90 frames
+                    track.pop(0)
 
                 class_ids.append(class_id)
                 boxes.append(box)

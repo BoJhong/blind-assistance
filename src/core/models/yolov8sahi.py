@@ -54,7 +54,7 @@ class Yolov8SahiDetectionModel(DetectionModel):
                     data.category.id,
                     np.array(data.bbox.to_xyxy(), dtype=np.float32),
                     data.score.value,
-                    -1
+                    0
                 )
                 if score < self.confidence_threshold:
                     continue

@@ -33,10 +33,10 @@ class DetectObstacle:
         self.detect_points = None
 
     def __call__(
-        self,
-        depth_frame: any,
-        color_img: np.asanyarray = None,
-        depth_img: np.asanyarray = None,
+            self,
+            depth_frame: any,
+            color_img: np.asanyarray = None,
+            depth_img: np.asanyarray = None,
     ):
         """
         :param depth_frame: 深度影像
@@ -116,14 +116,14 @@ class DetectObstacle:
 
                     # 如果高度低於最高坑洞的判斷標準，則代表有坑洞
                     if is_hole(self.do_env, height, lateral_dist):
-                        safe = False
+                        is_safe = False
                         color = (0, 0, 255)
                         heatmap_data[i, j] = 1
                         if dist < min_hole_distance:
                             min_hole_distance = dist
                     # 如果高度低於身高，又高於最低障礙物的判斷標準，則代表有障礙物
                     if is_obstacle(self.do_env, height, dist, lateral_dist):
-                        safe = False
+                        is_safe = False
                         color = (0, 255, 255)
                         heatmap_data[i, j] = 0.5
                         if dist < min_obstacle_distance:

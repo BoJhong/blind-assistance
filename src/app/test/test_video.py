@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import cv2
 import imutils
@@ -33,6 +34,8 @@ def on_mouse(event, x, y, flags, param):
 if config_env["video"].startswith("http"):
     cap = cap_from_youtube(config_env["video"], resolution="720p")
 else:
+    if not Path(config_env["video"]).exists():
+        raise FileNotFoundError(f"Source path {config_env['video']} does not exist.")
     cap = cv2.VideoCapture(config_env["video"])
 
 count = 0
