@@ -194,7 +194,7 @@ class DetectObstacle:
 
             # 將灰階圖轉換為熱力圖
             heatmap = cv2.applyColorMap(heatmap_data_normalized, cv2.COLORMAP_JET)
-            heatmap = cv2.addWeighted(heatmap, 0.2, np.zeros_like(heatmap), 0.8, 0)
+            heatmap = cv2.addWeighted(heatmap, 0.1, np.zeros_like(heatmap), 1, 0)
 
             heatmap = cv2.addWeighted(orig_color_img, 1, heatmap, 1, 0)
 

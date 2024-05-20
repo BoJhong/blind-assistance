@@ -50,10 +50,10 @@ while cap.isOpened() and cv2.getWindowProperty(windowName, cv2.WND_PROP_VISIBLE)
         count += config.env["config"]["skip_frame"]
         cap.set(cv2.CAP_PROP_POS_FRAMES, count)
 
-    object_exists, prediction_list = yolov8_sahi(frame)
+    prediction_list = yolov8_sahi(frame)
     combined_img = imutils.resize(frame.copy(), height=720)
 
-    if object_exists:
+    if len(prediction_list) > 0:
         combined_img = yolov8_sahi.draw_detections(combined_img, prediction_list)
         nearst_box = detect_cs(frame, prediction_list, yolov8_sahi.model.names)
         if nearst_box is not None:

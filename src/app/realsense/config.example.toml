@@ -4,6 +4,15 @@ debug = false  # 除錯模式
 [alarm]
 print = false         # 印出警告訊息
 windows_sound = true  # 播放Windows警告音效
+tts_enable = true                   # 是否啟用文字轉語音
+tts_host = "http://127.0.0.1:9880/" # 文字轉語音伺服器
+device = "CABLE Input"              # 輸出裝置
+sovits_path = "your_sovits_model.pth"  # SoVITS模型路徑
+gpt_path = "your_gpt_model.ckpt"     # GPT模型路徑
+ref_wav_path = "your_wav_file.wav"   # 參考音頻路徑
+prompt_text = "Your prompt text."    # 提示文字
+prompt_language = "zh"               # 提示文字語言
+text_language = "中英混合"            # 文字語言
 
 [obstacle_detection]
 my_height = 180                     # 身高

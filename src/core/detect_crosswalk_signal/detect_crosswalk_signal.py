@@ -8,6 +8,7 @@ import cv2
 from .utils import find_nearest
 from ..alarm.alarm import Alarm
 from ..detect_obstacle.detect_obstacle import DetectObstacle
+from ..toml_config import TOMLConfig
 
 
 class SignalStatus(Enum):
@@ -17,7 +18,11 @@ class SignalStatus(Enum):
 
 
 class DetectCrosswalkSignal:
+    instance = None
+
     def __init__(self, config: Any):
+        DetectCrosswalkSignal.instance = self
+
         self.dcs_env = config.env["detect_crosswalk_signal"]
         self.signal_status = SignalStatus.NONE
         self.invalid_time = -1
@@ -64,6 +69,15 @@ class DetectCrosswalkSignal:
         if self.signal_status == SignalStatus.NONE:
             return
 
+
+        if TOMLConfig.instance.env["alarm"]["tts_enable"]:
+            if self.signal_status == SignalStatus.RED:
+                message = "注意前方紅燈"
+            else:
+                message = "注意前方綠燈"
+            threading.Thread(target=self._speak, args=(message,)).start()
+            return
+
         self.is_alarm = True
 
         if self.signal_status == SignalStatus.RED:
@@ -100,19 +114,31 @@ class DetectCrosswalkSignal:
         if self.signal_status == SignalStatus.NONE:
             return
 
+        time_now = time.time() * 1000
+        invalid_time = self.dcs_env["invalid_time"] * 1000
+
         if self.invalid_time == -1:
-            self.invalid_time = time.time() * 1000
-        elif (
-            time.time() * 1000 - self.invalid_time > self.dcs_env["invalid_time"] * 1000
-        ):
+            self.invalid_time = time_now
+        elif time_now - self.invalid_time > invalid_time:
             self.invalid_time = -1
             self.signal_status = SignalStatus.NONE
-            notes = ["E4", "D4"]
-            threading.Thread(target=self.play_notes, args=notes).start()
-            print("沒有行人號誌，重置狀態")
+
+            if TOMLConfig.instance.env["alarm"]["tts_enable"]:
+                threading.Thread(target=self._speak, args=("行人號誌已離開視線",)).start()
+
+            else:
+                print("行人號誌已離開視線")
+                notes = ["E4", "D4"]
+                threading.Thread(target=self.play_notes, args=notes).start()
 
     def is_none(self):
         return self.signal_status == SignalStatus.NONE
+
+    def _speak(self, message):
+        self.is_alarm = True
+        Alarm.instance.speak(message)
+        self.is_alarm = False
+
 
     def play_notes(self, *args):
         if DetectObstacle.instance:

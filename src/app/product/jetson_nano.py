@@ -51,10 +51,10 @@ def slow_processing(c_image, d_image, n):
     def fn():
         global finished
 
-        object_exists, prediction_list = yolov8(c_image)
+        prediction_list = yolov8(c_image)
         finished = True
 
-        if object_exists:
+        if len(prediction_list) > 0:
             yolov8.print_detections(c_image, prediction_list, d_image)
             detect_cs(c_image, prediction_list, yolov8.category)
         else:

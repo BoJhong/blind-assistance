@@ -49,19 +49,22 @@ class Yolov8DetectionModel(DetectionModel):
 
                 if result.boxes.id is None:
                     continue
-                track_id = result.boxes.id[i].int().cpu().item()
-                track = track_history[track_id]
 
-                track.append(box)  # x, y center point
-                if len(track) > 30:  # retain 90 tracks for 90 frames
-                    track.pop(0)
+                if track_history is not None:
+                    track_id = result.boxes.id[i].int().cpu().item()
+                    track = track_history[track_id]
+
+                    track.append(box)  # x, y center point
+                    if len(track) > 30:  # retain 90 tracks for 90 frames
+                        track.pop(0)
+
+                    track_ids.append(track_id)
 
                 class_ids.append(class_id)
                 boxes.append(box)
                 scores.append(score)
-                track_ids.append(track_id)
 
-        return len(class_ids) != 0, list(zip(class_ids, boxes, scores, track_ids))
+        return list(zip(class_ids, boxes, scores, track_ids))
 
     def __call__(self, img: np.ndarray, track_history):
         """

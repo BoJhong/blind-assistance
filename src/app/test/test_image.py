@@ -25,9 +25,9 @@ else:
 
 img = imutils.resize(img, height=720)
 
-object_exists, prediction_list = yolov8_sahi(img)
+prediction_list = yolov8_sahi(img)
 
-if object_exists is not None:
+if len(prediction_list) > 0:
     combined_img = yolov8_sahi.draw_detections(img, prediction_list)
     cv2.imshow(windowName, combined_img)
 else:

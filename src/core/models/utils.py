@@ -3,51 +3,6 @@ from typing import Tuple, Any, Optional, Dict
 import cv2
 import numpy as np
 
-from src.core.realsense_camera.utils import get_middle_dist
-from src.core.toml_config import TOMLConfig
-
-
-def draw_detections(
-    image: np.ndarray,
-    prediction_list: Any,
-    category: Any,
-    colors: Any,
-    depth_data=None,
-    mask_alpha=0.3
-) -> np.ndarray:
-    det_img = image.copy()
-
-    img_height, img_width = image.shape[:2]
-    font_size = min([img_height, img_width]) * 0.0006
-    text_thickness = int(min([img_height, img_width]) * 0.001)
-
-    det_img = draw_masks(det_img, prediction_list, colors, mask_alpha)
-
-    # Draw bounding boxes and labels of detections
-    for class_id, box, score, track_id in prediction_list:
-        color = colors[class_id]
-        draw_box(det_img, box, color)
-
-        # 如果debug模式為關閉狀態，則不顯示標籤，只顯示框線
-        if not TOMLConfig.instance.env["config"]["debug"]:
-            continue
-
-        label = category[class_id]
-        caption = f"ID: {track_id} {label} {int(score * 100)}%"
-
-        # 如果有深度數據，則繪製距離
-        if depth_data is not None:
-            distance = get_middle_dist(det_img, box, depth_data, 24)
-
-            if distance != -1:
-                distance = str(distance / 1000)[:4]
-                caption += f" ({distance}m)"
-
-        draw_text(det_img, caption, box, color, font_size, text_thickness)
-
-    return det_img
-
-
 def draw_box(
     image: np.ndarray,
     box: np.ndarray,
@@ -75,12 +30,12 @@ def draw_text(
     )
     th = int(th * 1.2)
 
-    cv2.rectangle(image, (x1, y1), (x1 + tw, y1 - th), color, -1)
+    cv2.rectangle(image, (x1, y1), (x1 + tw, y1 + th), color, -1)
 
     return cv2.putText(
         image,
         text,
-        (x1, y1),
+        (x1, y1 + th),
         cv2.FONT_HERSHEY_SIMPLEX,
         font_size,
         (255, 255, 255),
@@ -95,7 +50,10 @@ def draw_masks(
     mask_img = image.copy()
 
     # Draw bounding boxes and labels of detections
-    for class_id, box, score, track_id in prediction_list:
+    for p in prediction_list:
+        class_id = p[0]
+        box = p[1]
+        score = p[2]
         color = colors[class_id]
         x1, y1, x2, y2 = box.astype(int)
 

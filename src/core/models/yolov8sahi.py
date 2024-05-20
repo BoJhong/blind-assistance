@@ -65,7 +65,7 @@ class Yolov8SahiDetectionModel(DetectionModel):
             boxes.append(box)
             scores.append(score)
 
-        return len(class_ids) != 0, list(zip(class_ids, boxes, scores))
+        return list(zip(class_ids, boxes, scores))
 
     def __call__(
         self,

@@ -1,6 +1,8 @@
 import sys
+
 sys.path.append('../../../src')
 import os
+
 from threading import Thread
 import numpy as np
 
@@ -13,6 +15,7 @@ from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
 from src.core.toml_config import TOMLConfig
 from src.utils.detect_blur import detect_blur_fft
+from src.core.detect_object.detect_object import DetectObject
 
 config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
 
@@ -21,6 +24,7 @@ yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
 detect_obstacle = DetectObstacle(config)
 alarm = Alarm(config)
 detect_cs = DetectCrosswalkSignal(config)
+detect_object = DetectObject(config, config.env["yolo"]["model"])
 
 last_process_frame = 0
 blurry = False
@@ -52,10 +56,10 @@ def slow_processing(image, n):
     def fn():
         global finished
 
-        object_exists, prediction_list = yolov8_sahi(image)
+        prediction_list = yolov8_sahi(image)
         finished = True
 
-        if object_exists:
+        if len(prediction_list) > 0:
             detect_cs(image, prediction_list, yolov8_sahi.category)
         else:
             detect_cs.invalid()
@@ -83,6 +87,7 @@ try:
         bottom_point = rs_camera.auto_camera_height(depth_frame)
 
         detect_obstacle(depth_frame, color_image)
+        detect_object(color_image, depth_frame)
 
         frame_number = frames.get_frame_number()
         slow_processing(color_image, frame_number)

@@ -94,14 +94,19 @@ class RealsenseCamera:
         pitch_angle_radians = math.radians(self.pitch + 90) - elevation
 
         # 距離計算攝影機到點的水平距離
-        horizontal_distance = dist * math.cos(pitch_angle_radians)
+        horizontal_dist = self.get_horizontal_dist(dist)
 
         # 使用三角函數計算高低差
         height = dist * math.sin(pitch_angle_radians) / 10 + base_height
         # 計算橫向距離
-        lateral_distance = abs(horizontal_distance * math.sin(azimuth))
+        lateral_distance = horizontal_dist * math.sin(azimuth)
 
-        return height, int(abs(horizontal_distance)), int(lateral_distance), depth_point
+        return height, int(abs(horizontal_dist)), int(lateral_distance), depth_point
+
+    def get_horizontal_dist(self, dist):
+        pitch_angle_radians = math.radians(self.pitch + 90)
+        horizontal_distance = dist * math.sin(pitch_angle_radians)
+        return int(abs(horizontal_distance))
 
     def project_color_pixel_to_depth_pixel(
         self, data: np.ndarray, from_pixel: Tuple[int, int]

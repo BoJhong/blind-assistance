@@ -5,6 +5,7 @@ from typing import Any
 import winsound
 
 from .pitches import pitches
+from .tts import TTS
 
 
 class Alarm:
@@ -22,6 +23,9 @@ class Alarm:
 
         # self.pwm = buzzer.setup()
 
+        if self.alarm_env["tts_enable"]:
+            self.tts = TTS(self.alarm_env)
+
     def __exit__(self):
         self.cleanup()
 
@@ -36,6 +40,16 @@ class Alarm:
             # pwm.stop()
 
         threading.Thread(target=fn).start()
+
+    def speak(self, message: str):
+        if self.alarm_env["print"]:
+            print(message)
+
+        if self.tts is not None:
+            self.tts(message)
+
+    def speak_async(self, message: str):
+        threading.Thread(target=self.speak, args=(message,)).start()
 
     def start(self, message: str = "警報！", duration: float = 1, frequency: int = 2500):
         self.duration = duration

@@ -9,6 +9,7 @@ from src.core.alarm.alarm import Alarm
 from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
     DetectCrosswalkSignal,
 )
+from src.core.detect_object.detect_object import DetectObject
 from src.core.detect_obstacle.detect_obstacle import DetectObstacle
 from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
@@ -21,6 +22,7 @@ yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
 detect_obstacle = DetectObstacle(config)
 alarm = Alarm(config)
 detect_cs = DetectCrosswalkSignal(config)
+detect_object = DetectObject(config, config.env["yolo"]["model"])
 
 window_name = "Showcase"
 dcs_window_name = "Detect Crosswalk Signal"
@@ -59,10 +61,10 @@ def slow_processing(image, depth_image, n):
         if mean is not None:
             img = draw_blur_status(image, mean, blurry)
 
-        sahi_object_exists, sahi_prediction_list = yolov8_sahi(image)
+        sahi_prediction_list = yolov8_sahi(image)
         finished = True
 
-        if sahi_object_exists:
+        if len(sahi_prediction_list) > 0:
             nearst_box = detect_cs(image, sahi_prediction_list, yolov8_sahi.category)
             if nearst_box is not None:
                 img = detect_cs.draw_line(img, nearst_box)
@@ -80,7 +82,7 @@ try:
         cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) >= 1
         and cv2.getWindowProperty(dcs_window_name, cv2.WND_PROP_VISIBLE) >= 1
     ):
-        frames = rs_camera.pipeline.wait_for_frames()
+        frames = rs_camera.pipeline.wait_for_frames(10000)
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
 
@@ -106,6 +108,13 @@ try:
             elevation_view_img,
             heatmap,
         ) = detect_obstacle(depth_frame, color_image, depth_colormap)
+
+        prediction_list = detect_object(color_image, depth_frame)
+
+        if len(prediction_list) > 0:
+            heatmap = detect_object.draw_detections(
+                heatmap, prediction_list, depth_image, 0
+            )
 
         frame_number = frames.get_frame_number()
         slow_processing(color_image, depth_image, frame_number)

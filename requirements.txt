@@ -1,7 +1,11 @@
-pyrealsense2
-ultralytics
-opencv-python
-toml
-sahi
-imutils
+pyrealsense2~=2.55.1.6486
+ultralytics~=8.2.15
+opencv-python~=4.7.0.72
+toml~=0.10.2
+sahi~=0.11.15
+imutils~=0.5.4
 cap_from_youtube
+torch~=2.3.0+cu121
+numpy~=1.24.4
+requests~=2.31.0
+pyaudio~=0.2.14
