@@ -6,25 +6,23 @@ import numpy as np
 
 from src.core.alarm.alarm import Alarm
 from src.core.detect_object.detect_object import DetectObject
-from src.core.models.yolov8 import Yolov8DetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
 from src.core.toml_config import TOMLConfig
 
 config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
 
 rs_camera = RealsenseCamera(config)
-yolov8 = Yolov8DetectionModel(config, config.env["yolo"]["model"])
 alarm = Alarm(config)
 detect_object = DetectObject(config, config.env["yolo"]["model"])
 
-dcs_window_name = "Detect Crosswalk Signal"
-cv2.namedWindow(dcs_window_name, cv2.WINDOW_AUTOSIZE)
+objd_window_name = "Object Detection"
+cv2.namedWindow(objd_window_name, cv2.WINDOW_AUTOSIZE)
 
 dcs_img = None
 finished = True
 
 try:
-    while cv2.getWindowProperty(dcs_window_name, cv2.WND_PROP_VISIBLE) >= 1:
+    while cv2.getWindowProperty(objd_window_name, cv2.WND_PROP_VISIBLE) >= 1:
         frames = rs_camera.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
@@ -50,7 +48,7 @@ try:
                 yolov8_img, prediction_list, depth_image
             )
 
-        cv2.imshow("Object Detection", imutils.resize(yolov8_img, height=480))
+        cv2.imshow(objd_window_name, imutils.resize(yolov8_img, height=480))
         key = cv2.waitKey(1)
 
         if key & 0xFF == ord("q") or key == 27:

@@ -26,8 +26,10 @@ detect_object = DetectObject(config, config.env["yolo"]["model"])
 
 window_name = "Showcase"
 dcs_window_name = "Detect Crosswalk Signal"
+objd_window_name = "Object Detection and Heatmap"
 cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 cv2.namedWindow(dcs_window_name, cv2.WINDOW_AUTOSIZE)
+cv2.namedWindow(objd_window_name, cv2.WINDOW_AUTOSIZE)
 
 dcs_img = None
 last_process_frame = 0
@@ -81,6 +83,7 @@ try:
     while (
         cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) >= 1
         and cv2.getWindowProperty(dcs_window_name, cv2.WND_PROP_VISIBLE) >= 1
+        and cv2.getWindowProperty(objd_window_name, cv2.WND_PROP_VISIBLE) >= 1
     ):
         frames = rs_camera.pipeline.wait_for_frames(10000)
         depth_frame = frames.get_depth_frame()
@@ -134,7 +137,7 @@ try:
 
         cv2.imshow(window_name, images)
         cv2.imshow(dcs_window_name, imutils.resize(dcs_img, height=480))
-        cv2.imshow("Heatmap", imutils.resize(heatmap, height=480))
+        cv2.imshow(objd_window_name, imutils.resize(heatmap, height=480))
         key = cv2.waitKey(1)
 
         if key & 0xFF == ord("q") or key == 27:
