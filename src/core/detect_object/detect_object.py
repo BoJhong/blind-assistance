@@ -84,7 +84,7 @@ class DetectObject:
                     continue
 
                 if dist == -1:
-                    continue  # 距離太遠不警報
+                    continue  # 消失點不警報
 
                 if lateral_dist < -150:
                     direction = "左側方"
@@ -120,15 +120,15 @@ class DetectObject:
         name, track_id, direction, dist = self.object_queue[0]
         self.object_queue = []
 
-        if dist < 500:
-            dist_str = "近"
-        elif dist < 1000:
-            dist_str = "中"
+        if dist > 1000:
+            dist_str = f"{str(round(dist / 100) / 10).replace('.', '點')}公尺"
+        elif dist >= 100:
+            dist_str = f"{round(dist / 100) * 100}公分"
         else:
-            dist_str = "遠"
+            dist_str = f"{round(dist / 10) * 10}公分"
 
         self.last_alarm_time = time_now
-        threading.Thread(target=self._speak, args=(f"{name}{track_id}在{direction}{dist_str}距離",)).start()
+        threading.Thread(target=self._speak, args=(f"{direction}{dist_str}有{name}{track_id}",)).start()
 
     def _speak(self, message):
         self.speaking = True
