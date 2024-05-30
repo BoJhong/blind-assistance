@@ -1,4 +1,5 @@
 import os
+import threading
 
 import cv2
 import imutils
@@ -72,3 +73,5 @@ while cap.isOpened() and cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE
         cap.release()
         cv2.destroyAllWindows()
         break
+    if key & 0xFF == ord("v"):
+        detect_cs.vision_countdown(frame)

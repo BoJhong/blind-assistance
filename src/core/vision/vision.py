@@ -5,7 +5,6 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 
 from src.utils.opencv import draw_multiline_text_with_border
-from googletrans import Translator
 
 class Vision:
     instance = None
@@ -27,7 +26,6 @@ class Vision:
             torch_dtype=dtype
         ).to(device=device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
-        self.translator = Translator()
 
     def predict(self, image, prompt="Describe the image in detail.", stream=None, speak=False):
         enc_image = self.model.encode_image(image)

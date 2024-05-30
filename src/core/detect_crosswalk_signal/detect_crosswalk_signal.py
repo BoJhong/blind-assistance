@@ -29,8 +29,6 @@ class DetectCrosswalkSignal:
         self.signal_status = SignalStatus.NONE
         self.invalid_time = -1
         self.is_alarm = False
-        self.last_vision_time = 0
-        self.visioned = False
 
     def __call__(self, image, prediction_list, names):
         """
@@ -64,26 +62,19 @@ class DetectCrosswalkSignal:
             self.signal_status = signal_status
             self.alert()
 
-        if self.signal_status != SignalStatus.NONE:
-            if Vision.instance is not None and not self.visioned:
-                threading.Thread(target=self.vision_countdown, args=(image,)).start()
-                self.visioned = True
-
         return box
 
     def vision_countdown(self, image):
-        start_time = time.time() * 1000  # 紀錄開始計算的時間
+        start_time = time.time()  # 紀錄開始計算的時間
         prompt = "Please tell me the countdown seconds of the pedestrian signal closest to the center of the screen (only answer with a number)."
         response = Vision.instance.predict(Image.fromarray(image), prompt).strip()
-        end_time = time.time() * 1000
+        end_time = time.time()
         second = int(response) if response.isdigit() else 0
-        calc_time = round((end_time - start_time) / 1000)  # 計算時間
+        calc_time = round(end_time - start_time)  # 計算時間
         countdown = second - calc_time  # 扣除計算時間後的倒數秒數
         print(f"預測 {second} 秒")
         print(f"計算 {calc_time} 秒")
         print(f"倒數 {countdown} 秒")
-        self.visioned = False
-        self.last_vision_time = round(time.time() * 1000)
 
     def alert(self):
         """

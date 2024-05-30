@@ -24,15 +24,11 @@ color_image = None
 depth_image = None
 vision_response = None
 
-def stream_fn(text: str):
-    global vision_response
-    vision_response = text
-
 def slow_processing():
     global vision, color_image, depth_image, vision_response
     while 1:
         if color_image is not None:
-            vision_response = vision.predict(Image.fromarray(color_image), speak=True, stream=stream_fn)
+            vision_response = vision.predict(Image.fromarray(color_image))
 
 
 threading.Thread(target=slow_processing).start()
