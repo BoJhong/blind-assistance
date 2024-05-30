@@ -9,3 +9,5 @@ torch~=2.3.0+cu121
 numpy~=1.24.4
 requests~=2.31.0
 pyaudio~=0.2.14
+transformers~=4.41.1
+pillow~=10.3.0

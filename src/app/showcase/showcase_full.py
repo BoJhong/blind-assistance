@@ -14,6 +14,7 @@ from src.core.detect_obstacle.detect_obstacle import DetectObstacle
 from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
 from src.core.toml_config import TOMLConfig
+from src.core.vision.vision import Vision
 from src.utils.detect_blur import draw_blur_status
 
 config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
@@ -23,6 +24,7 @@ detect_obstacle = DetectObstacle(config)
 alarm = Alarm(config)
 detect_cs = DetectCrosswalkSignal(config)
 detect_object = DetectObject(config, config.env["yolo"]["model"])
+vision = Vision(config)
 
 window_name = "Showcase"
 dcs_window_name = "Detect Crosswalk Signal"

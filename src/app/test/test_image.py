@@ -21,7 +21,10 @@ if config_env["image"].startswith("http"):
     np_arr = np.frombuffer(response, np.uint8)
     img = cv2.imdecode(np_arr, cv2.IMREAD_UNCHANGED)
 else:
-    img = cv2.imread(config_env["image"])
+    image_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', config_env["image"])
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"Source path {image_path} does not exist.")
+    img = cv2.imread(image_path)
 
 img = imutils.resize(img, height=720)
 

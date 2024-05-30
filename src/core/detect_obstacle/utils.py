@@ -124,11 +124,11 @@ def alert(
             f"警報：第{missing_point}點缺失", od_env["missing_point_alarm_interval"], 2000
         )
     elif is_warning(
-        od_env["hole_preset"], min_hole_distance, "警報：距離最近的坑洞 {}m ({})", 2500
+        od_env["hole_preset"], min_hole_distance, "警報：距離最近的坑洞 {}mm ({})", 2500
     ):
         pass
     elif is_warning(
-        od_env["obstacle_preset"], min_obstacle_distance, "警報：距離最近的障礙 {}m ({})", 3000
+        od_env["obstacle_preset"], min_obstacle_distance, "警報：距離最近的障礙 {}mm ({})", 3000
     ):
         pass
     elif alarm:

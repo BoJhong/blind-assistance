@@ -1,4 +1,5 @@
 import threading
+import time
 from collections import defaultdict
 from datetime import datetime
 from typing import Any
@@ -6,6 +7,7 @@ from typing import Any
 import numpy as np
 
 from src.core.alarm.alarm import Alarm
+from src.core.models.class_names import class_names
 from src.core.models.yolov8 import Yolov8DetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
 from src.core.toml_config import TOMLConfig
@@ -23,21 +25,14 @@ class DetectObject:
         self.object_queue = []
         self.speaking = False
 
-        self.class_names = {
-            "person": "行人",
-            "bicycle": "自行車",
-            "car": "汽車",
-            "motorcycle": "機車",
-            "bus": "公車",
-            "truck": "卡車",
-        }
-
     def __call__(self, color_image, depth_frame=None):
         prediction_list = self.yolov8(color_image, track_history)
         closest_object = None
 
         for class_id, box, score, track_id in prediction_list:
             class_name = self.yolov8.category[class_id]
+            if class_name == "traffic light":  # 不警報紅綠燈
+                continue
 
             track = track_history[track_id]
 
@@ -58,7 +53,7 @@ class DetectObject:
                 else:
                     alarmed_objects_time[track_id] = date_now
 
-            name = self.class_names[class_name] if class_name in self.class_names else class_name
+            name = class_names[class_id]
 
             object_center = (int((box[2] - box[0]) / 2 + box[0]), int((box[3] - box[1]) / 2 + box[1]))
 
@@ -106,14 +101,12 @@ class DetectObject:
         return prediction_list
 
     def _alert(self):
-        time_now = int(datetime.now().timestamp() * 1000)
+        time_now = int(time.time() * 1000)
 
-        if self.speaking:
-            self.last_alarm_time = time_now
+        if self.speaking or len(self.object_queue) == 0 or time_now - self.last_alarm_time < 1000:
             return
 
-        if len(self.object_queue) == 0 or time_now - self.last_alarm_time < 1000:
-            return
+        self.speaking = True
 
         # 找出最近的物體
         self.object_queue.sort(key=lambda x: x[3])
@@ -123,17 +116,20 @@ class DetectObject:
         if dist > 1000:
             dist_str = f"{str(round(dist / 100) / 10).replace('.', '點')}公尺"
         elif dist >= 100:
-            dist_str = f"{round(dist / 100) * 100}公分"
-        else:
             dist_str = f"{round(dist / 10) * 10}公分"
+        elif dist >= 10:
+            dist_str = f"{round(dist)}公分"
+        else:
+            dist_str = ""
+        print(dist)
 
         self.last_alarm_time = time_now
         threading.Thread(target=self._speak, args=(f"{direction}{dist_str}有{name}{track_id}",)).start()
 
     def _speak(self, message):
-        self.speaking = True
         Alarm.instance.speak(message)
         self.speaking = False
+        self.last_alarm_time = int(time.time() * 1000)
 
     def draw_detections(self, image, prediction_list, depth_image, mask_alpha: float = 0.4):
         # for track_id in track_history:

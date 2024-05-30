@@ -1,4 +1,5 @@
 import os
+
 import cv2
 from cap_from_youtube import cap_from_youtube
 
@@ -20,7 +21,10 @@ config_env = config.env["config"]
 if config_env["video"].startswith("http"):
     cap = cap_from_youtube(config_env["video"], resolution="720p")
 else:
-    cap = cv2.VideoCapture(os.path.join(os.path.dirname(__file__), config_env["video"]))
+    video_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', config_env["video"])
+    if not os.path.exists(video_path):
+        raise FileNotFoundError(f"Source path {video_path} does not exist.")
+    cap = cv2.VideoCapture(video_path)
 
 count = 0
 

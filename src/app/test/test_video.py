@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import cv2
 import imutils
@@ -11,18 +10,20 @@ from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
 )
 from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
 from src.core.toml_config import TOMLConfig
+from src.core.vision.vision import Vision
 
 config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
 
 yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
 alarm = Alarm(config)
 detect_cs = DetectCrosswalkSignal(config)
+vision = Vision(config)
 
 config_env = config.env["config"]
 clicked = False
 
-windowName = "Video Test"
-cv2.namedWindow(windowName, cv2.WINDOW_AUTOSIZE)
+window_name = "Video Test"
+cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 
 
 def on_mouse(event, x, y, flags, param):
@@ -34,13 +35,14 @@ def on_mouse(event, x, y, flags, param):
 if config_env["video"].startswith("http"):
     cap = cap_from_youtube(config_env["video"], resolution="720p")
 else:
-    if not Path(config_env["video"]).exists():
-        raise FileNotFoundError(f"Source path {config_env['video']} does not exist.")
-    cap = cv2.VideoCapture(config_env["video"])
+    video_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', config_env["video"])
+    if not os.path.exists(video_path):
+        raise FileNotFoundError(f"Source path {video_path} does not exist.")
+    cap = cv2.VideoCapture(video_path)
 
 count = 0
 
-while cap.isOpened() and cv2.getWindowProperty(windowName, cv2.WND_PROP_VISIBLE) >= 1:
+while cap.isOpened() and cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) >= 1:
     if not clicked:
         ret, frame = cap.read()
         if not ret:
@@ -61,9 +63,9 @@ while cap.isOpened() and cv2.getWindowProperty(windowName, cv2.WND_PROP_VISIBLE)
     else:
         detect_cs.invalid()
 
-    cv2.imshow(windowName, combined_img)
+    cv2.imshow(window_name, combined_img)
 
-    cv2.setMouseCallback(windowName, on_mouse)
+    cv2.setMouseCallback(window_name, on_mouse)
     key = cv2.waitKey(1)
 
     if key & 0xFF == ord("q") or key == 27:
