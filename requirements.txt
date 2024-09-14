@@ -12,3 +12,5 @@ pyaudio~=0.2.14
 transformers~=4.41.1
 pillow~=10.3.0
 einops
+pyttsx3
+sounddevice

@@ -6,6 +6,7 @@ import wave
 from typing import Any
 
 import pyaudio
+import pyttsx3
 import requests
 
 splits = {"，", "。", "？", "！", ",", ".", "?", "!", "~", ":", "：", "—", "…", }
@@ -23,11 +24,14 @@ class TTS:
 
         self.alarm_env = alarm_env
         self.pyAudio = pyaudio.PyAudio()
+        self.engine = pyttsx3.init()
 
     def __call__(self, message):
-        playback_event = threading.Event()
-        self.get_audio(message, playback_event)
-        playback_event.wait()  # 等待當前語音播放完成
+        # playback_event = threading.Event()
+        # self.get_audio(message, playback_event)
+        # playback_event.wait()
+        self.engine.say(message)
+        self.engine.runAndWait()
 
     def process_get_audio_queue(self):
         if self.getting_audio is True:

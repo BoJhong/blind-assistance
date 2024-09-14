@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 
 from src.core.alarm.alarm import Alarm
+from src.core.detect_crosswalk_signal.detect_crosswalk_signal import DetectCrosswalkSignal
 from src.core.models.class_names import class_names
 from src.core.models.yolov8 import Yolov8DetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
@@ -104,6 +105,9 @@ class DetectObject:
         time_now = int(time.time() * 1000)
 
         if self.speaking or len(self.object_queue) == 0 or time_now - self.last_alarm_time < 1000:
+            return
+
+        if DetectCrosswalkSignal.instance.is_alarm:
             return
 
         self.speaking = True
