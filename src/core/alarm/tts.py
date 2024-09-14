@@ -35,26 +35,18 @@ class TTS:
         self.getting_audio = True
         while not self.get_audio_queue.empty():
             data, playback_event = self.get_audio_queue.get()
-            try_times = 0  # 嘗試次數
-            while 1:
-                try:
-                    self.response = requests.post(self.alarm_env["tts_host"], json=data, timeout=20)
-                except requests.exceptions.RequestException as e:
-                    print(f"錯誤：{e}")
-                    try_times += 1
-                    if try_times == 3:
-                        self.cancel()
-                        self.getting_audio = False
-                        return
-                    continue
+            try:
+                self.response = requests.post(self.alarm_env["tts_host"], json=data)
+            except requests.exceptions.RequestException as e:
+                print(f"錯誤：{e}")
 
-                if self.getting_audio is False:
-                    break
-
-                audio_data = self.response.content
-                # 啟動音頻播放執行緒
-                threading.Thread(target=self.play_audio_thread, args=(audio_data, playback_event)).start()
+            if self.getting_audio is False:
                 break
+
+            audio_data = self.response.content
+            # 啟動音頻播放執行緒
+            threading.Thread(target=self.play_audio_thread, args=(audio_data, playback_event)).start()
+            break
         self.getting_audio = False
 
     def play_audio_thread(self, audio_data, playback_event):

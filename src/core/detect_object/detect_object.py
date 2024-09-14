@@ -114,11 +114,11 @@ class DetectObject:
         self.object_queue = []
 
         if dist > 1000:
-            dist_str = f"{str(round(dist / 100) / 10).replace('.', '點')}公尺"
+            dist_str = f"{str(round(dist / 100) / 10).replace('.', '點')}公分"
         elif dist >= 100:
-            dist_str = f"{round(dist / 10) * 10}公分"
+            dist_str = f"{round(dist / 10) * 10}毫米"
         elif dist >= 10:
-            dist_str = f"{round(dist)}公分"
+            dist_str = f"{round(dist)}毫米"
         else:
             dist_str = ""
         print(dist)

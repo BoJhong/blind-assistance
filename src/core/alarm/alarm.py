@@ -6,7 +6,7 @@ import winsound
 
 from .pitches import pitches
 from .tts import TTS
-
+import logging
 
 class Alarm:
     instance = None
@@ -43,7 +43,7 @@ class Alarm:
 
     def speak(self, message: str):
         if self.alarm_env["print"]:
-            print(message)
+            logging.info(message)
 
         if self.tts is not None:
             self.tts(message)
@@ -69,7 +69,7 @@ class Alarm:
         while self.exec_status:
             self.play_sound(self.frequency, self.duration)
             if self.alarm_env["print"] and self.message is not None:
-                print(self.message)
+                logging.info(self.message)
             time.sleep(self.duration * 2)
         self.loop = False
 
