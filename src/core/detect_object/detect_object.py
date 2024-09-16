@@ -107,7 +107,7 @@ class DetectObject:
         if self.speaking or len(self.object_queue) == 0 or time_now - self.last_alarm_time < 1000:
             return
 
-        if DetectCrosswalkSignal.instance.is_alarm:
+        if DetectCrosswalkSignal.instance is not None and DetectCrosswalkSignal.instance.is_alarm:
             return
 
         self.speaking = True
@@ -118,11 +118,11 @@ class DetectObject:
         self.object_queue = []
 
         if dist > 1000:
-            dist_str = f"{str(round(dist / 100) / 10).replace('.', '點')}公分"
+            dist_str = f"{str(round(dist / 100) / 10).replace('.', '點')}公尺"  # 毫米轉公尺
         elif dist >= 100:
-            dist_str = f"{round(dist / 10) * 10}毫米"
+            dist_str = f"{round(dist / 100) * 10}公分"  # 毫米轉公分，去掉尾數 例如：1372毫米 → 130公分
         elif dist >= 10:
-            dist_str = f"{round(dist)}毫米"
+            dist_str = f"{round(dist / 10)}公分"  # 毫米轉公分
         else:
             dist_str = ""
         print(dist)

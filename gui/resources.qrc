@@ -1,0 +1,16 @@
+<RCC>
+  <qresource>
+    <file>img/camera_light.png</file>
+    <file>img/camera_dark.png</file>
+    <file>img/alarm_dark.png</file>
+    <file>img/alarm_light.png</file>
+    <file>img/mic_dark.png</file>
+    <file>img/playback_dark.png</file>
+    <file>img/green_light.png</file>
+    <file>img/mic_light.png</file>
+    <file>img/playback_light.png</file>
+    <file>img/setting_dark.png</file>
+    <file>img/setting_light.png</file>
+    <file>img/red_light.png</file>
+  </qresource>
+</RCC>

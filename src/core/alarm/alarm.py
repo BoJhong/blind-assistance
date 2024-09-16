@@ -9,6 +9,7 @@ from .pitches import pitches
 from .tts import TTS
 import logging
 
+
 class Alarm:
     instance = None
     exec_status = False
@@ -33,16 +34,16 @@ class Alarm:
     def play_sound(self, frequency: int = 2500, duration: float = 1):
         def fn():
             # self.pwm.start(frequency)
-            self.bip(frequency, duration)
+            self.bip(freq=frequency, dur=duration, volume=0.1)
             time.sleep(duration)  # 聲音持續時間
             # pwm.stop()
 
         threading.Thread(target=fn).start()
 
-    def bip(self, freq, dur, a=0, d=0, s=1, r=0):
+    def bip(self, freq, dur, a=0, d=0, s=1, r=0, volume=1.0):
         t = np.arange(0, dur, 1 / 44100)
         env = np.interp(t, [0, a, (a + d), dur - r, dur], [0, 1, s, s, 0])
-        sound = np.sin(2 * np.pi * freq * t) * env
+        sound = np.sin(2 * np.pi * freq * t) * env * volume
         sd.play(sound, samplerate=44100)
 
     def speak(self, message: str):

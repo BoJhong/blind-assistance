@@ -1,9 +1,12 @@
+import threading
 from threading import Thread
 
 import cv2
 import torch
+from deep_translator import GoogleTranslator
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
-
+from googletrans import Translator
+from src.core.alarm.tts import TTS
 from src.utils.opencv import draw_multiline_text_with_border
 
 class Vision:
@@ -16,27 +19,42 @@ class Vision:
 
         model_id = "vikhyatk/moondream2"
         revision = "2024-05-20"
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        print("推理裝置: {}".format(device))
         dtype = torch.float32 if device == "cpu" else torch.float16  # CPU doesn't support float16
+        print("精度: {}".format(dtype))
 
         self.model = AutoModelForCausalLM.from_pretrained(
-            "vikhyatk/moondream2",
+            model_id,
             trust_remote_code=True,
             revision=revision,
-            torch_dtype=dtype
+            torch_dtype=dtype,
+            low_cpu_mem_usage=True,
+            use_safetensors=True,
+            # attn_implementation="flash_attention_2",
+            device_map="cuda:0"
         ).to(device=device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
+        print(f"Model loaded: {model_id}")
 
-    def predict(self, image, prompt="Describe the image in detail.", stream=None, speak=False):
+    def predict(self, image, prompt="Describe this image.", stream=None, speak=False):
+        prompt = GoogleTranslator(target='en').translate(prompt)
         enc_image = self.model.encode_image(image)
         response = self.answer_question(enc_image, prompt)
         result = ''
         for txt in response:
             if txt.strip() == '':
                 continue
+
             result = txt
             if stream is not None:
                 stream(txt)
+
+        result = GoogleTranslator(source='en', target='zh-TW').translate(result)
+        stream(result)
+
+        if speak and TTS.instance is not None:
+            threading.Thread(target=TTS.instance, args=(result,)).start()
 
         return result
 

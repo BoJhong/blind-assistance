@@ -1,11 +1,10 @@
 import os
 import sys
+import threading
 from threading import Thread
 
 import cv2
-import imutils
 import numpy as np
-from PIL import Image
 from PyQt5.QtWidgets import QApplication
 
 from src.core.alarm.alarm import Alarm
@@ -22,13 +21,22 @@ from src.core.vision.vision import Vision
 from src.utils.detect_blur import draw_blur_status
 
 config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
-rs_camera = RealsenseCamera(config)
-yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
 detect_obstacle = DetectObstacle(config)
 alarm = Alarm(config)
 detect_cs = DetectCrosswalkSignal(config)
 detect_object = DetectObject(config, config.env["yolo"]["model"])
-vision = Vision(config)
+
+vision = None
+yolov8_sahi = None
+
+def init_thread():
+    global vision, yolov8_sahi
+    yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
+    vision = Vision(config)
+
+
+threading.Thread(target=init_thread).start()
+
 app = QApplication(sys.argv)
 
 dcs_img = None
@@ -80,21 +88,29 @@ def slow_processing(image, depth_image, n):
 
 
 def update_frame(main_window: Gui):
-    frames = rs_camera.pipeline.wait_for_frames(10000)
+    if RealsenseCamera.instance is None:
+        return
+    frames = RealsenseCamera.instance.pipeline.wait_for_frames(60 * 1000)  # timeout時間設為1分鐘
     depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
 
     if not depth_frame or not color_frame:
         return
 
-    motion = rs_camera.combined_angle(frames)
+    motion = RealsenseCamera.instance.combined_angle(frames)
     if not motion:
         return
 
-    bottom_point, camera_height = rs_camera.auto_camera_height(depth_frame)
+    bottom_point, camera_height = RealsenseCamera.instance.auto_camera_height(depth_frame)
 
     depth_image = np.asanyarray(depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
+
+    Gui.instance.depth_frame = depth_frame
+    Gui.instance.color_frame = color_frame
+    Gui.instance.depth_image = depth_image.copy()
+    Gui.instance.color_image = color_image.copy()
+
     depth_colormap = cv2.applyColorMap(
         cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET
     )
@@ -116,28 +132,27 @@ def update_frame(main_window: Gui):
         )
 
     frame_number = frames.get_frame_number()
-    slow_processing(color_image, depth_image, frame_number)
+    if yolov8_sahi:
+        slow_processing(color_image, depth_image, frame_number)
 
     global dcs_img
     if dcs_img is None:
         dcs_img = color_image.copy()
 
     if bottom_point:
-        combined_depth_colormap = rs_camera.draw_bottom_point(
+        combined_depth_colormap = RealsenseCamera.instance.draw_bottom_point(
             combined_depth_colormap, bottom_point
         )
 
-    combined_depth_colormap = rs_camera.draw_motion(combined_depth_colormap)
+    combined_depth_colormap = RealsenseCamera.instance.draw_motion(combined_depth_colormap)
 
     main_window.display_image(combined_img, 0)
     main_window.display_image(combined_depth_colormap, 1)
     main_window.display_image(detect_object_img, 2)
     main_window.display_image(heatmap, 3)
 
-def stop():
-    rs_camera.pipeline.stop()
-    alarm.cleanup()
 
-gui = Gui(config, update_frame, stop)
+gui = Gui(config, update_frame)
+gui.setWindowTitle("盲人輔助系統 Blind Assistance")
 gui.show()
 sys.exit(app.exec_())

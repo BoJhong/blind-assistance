@@ -4,6 +4,7 @@ from collections import defaultdict
 import cv2
 import imutils
 import numpy as np
+from PIL import Image
 
 from src.core.alarm.alarm import Alarm
 from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
@@ -69,6 +70,8 @@ try:
             TOMLConfig.instance.env["obstacle_detection"][
                 "camera_height"
             ] = camera_height
+        if key & 0xFF == ord("v"):
+            detect_cs.vision_countdown(color_image)
 finally:
     rs_camera.pipeline.stop()
     alarm.cleanup()

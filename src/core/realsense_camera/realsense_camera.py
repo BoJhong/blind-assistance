@@ -17,7 +17,7 @@ from src.core.realsense_camera.utils import (
 class RealsenseCamera:
     instance = None
 
-    def __init__(self, config: Any, setting=None):
+    def __init__(self, config: Any, file=None, setting=None):
         """
         初始化RealSense相機
         :param config: toml設定檔
@@ -27,8 +27,13 @@ class RealsenseCamera:
 
         self.rs_env = config.env["realsense"]
         self.pipeline = rs.pipeline()
-        self.config = setting or default_setting()
+        self.config = setting or default_setting(file)
         self.profile = self.pipeline.start(self.config)
+
+        if file:
+            device = self.config.resolve(self.pipeline).get_device()
+            playback = device.as_playback()
+            playback.set_real_time(False)
 
         self.pitch = 0
         self.yaw = 0

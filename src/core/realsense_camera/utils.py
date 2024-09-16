@@ -6,12 +6,15 @@ import numpy as np
 import pyrealsense2 as rs
 
 
-def default_setting():
+def default_setting(file=None):
     config = rs.config()
-    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 15)
-    config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 15)
-    config.enable_stream(rs.stream.accel)
-    config.enable_stream(rs.stream.gyro)
+    if file:
+        config.enable_device_from_file(file, repeat_playback=True)
+    else:
+        config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 15)
+        config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 15)
+        config.enable_stream(rs.stream.accel)
+        config.enable_stream(rs.stream.gyro)
     return config
 
 
@@ -49,25 +52,28 @@ def get_rotation_matrix(motion_radians: (int, int, int)):
     roll = -roll
     return np.array(
         [
-            [
-                math.cos(yaw) * math.cos(pitch),
-                math.cos(yaw) * math.sin(pitch) * math.sin(roll)
-                - math.sin(yaw) * math.cos(roll),
-                math.cos(yaw) * math.sin(pitch) * math.cos(roll)
-                + math.sin(yaw) * math.sin(roll),
-            ],
-            [
-                math.sin(yaw) * math.cos(pitch),
-                math.sin(yaw) * math.sin(pitch) * math.sin(roll)
-                + math.cos(yaw) * math.cos(roll),
-                math.sin(yaw) * math.sin(pitch) * math.cos(roll)
-                - math.cos(yaw) * math.sin(roll),
-            ],
-            [
-                -math.sin(pitch),
-                math.cos(pitch) * math.sin(roll),
-                math.cos(pitch) * math.cos(roll),
-            ],
+            [math.cos(pitch), 0, math.sin(pitch)],
+            [0, 1, 0],
+            [-math.sin(pitch), 0, math.cos(pitch)],
+            # [
+            #     math.cos(yaw) * math.cos(pitch),
+            #     math.cos(yaw) * math.sin(pitch) * math.sin(roll)
+            #     - math.sin(yaw) * math.cos(roll),
+            #     math.cos(yaw) * math.sin(pitch) * math.cos(roll)
+            #     + math.sin(yaw) * math.sin(roll),
+            # ],
+            # [
+            #     math.sin(yaw) * math.cos(pitch),
+            #     math.sin(yaw) * math.sin(pitch) * math.sin(roll)
+            #     + math.cos(yaw) * math.cos(roll),
+            #     math.sin(yaw) * math.sin(pitch) * math.cos(roll)
+            #     - math.cos(yaw) * math.sin(roll),
+            # ],
+            # [
+            #     -math.sin(pitch),
+            #     math.cos(pitch) * math.sin(roll),
+            #     math.cos(pitch) * math.cos(roll),
+            # ],
         ]
     )
 

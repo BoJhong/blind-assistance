@@ -22,6 +22,7 @@ class Yolov8SahiDetectionModel(DetectionModel):
                 confidence_threshold=self.yolo_env["confidence_threshold"],
             ),
         )
+        print(f"Model loaded: {self.model_path}")
         """ "
         檢測模型已經初始化並成功設定為 self.model
         （需要利用self.model_path、self.config_path和self.device）

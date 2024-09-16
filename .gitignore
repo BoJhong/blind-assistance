@@ -2,7 +2,8 @@
 .vscode/
 models/
 site-packages/
-config.toml
+*.toml
+!config.example.toml
 .env
 .DS_Store
 .idea

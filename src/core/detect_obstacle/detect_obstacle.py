@@ -63,11 +63,11 @@ class DetectObstacle:
         color_img = cv2.polylines(color_img, [area], True, (255, 255, 255), 2)
         img_height, img_width = color_img.shape[:2]
 
-        if self.detect_points is None:
-            spilt_count = 40 if img_height == 480 else 60
-            self.detect_points = init_detect_points(
-                self.do_env, img_height, img_width, area, spilt_count
-            )
+        # if self.detect_points is None:
+        spilt_count = 40 if img_height == 480 else 60
+        self.detect_points = init_detect_points(
+            self.do_env, img_height, img_width, area, spilt_count
+        )
 
         if debug:
             border_img = np.zeros((img_height, img_width, 3), np.uint8)

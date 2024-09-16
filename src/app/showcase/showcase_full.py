@@ -88,7 +88,7 @@ try:
         and cv2.getWindowProperty(dcs_window_name, cv2.WND_PROP_VISIBLE) >= 1
         and cv2.getWindowProperty(objd_window_name, cv2.WND_PROP_VISIBLE) >= 1
     ):
-        frames = rs_camera.pipeline.wait_for_frames(10000)
+        frames = rs_camera.pipeline.wait_for_frames(60 * 1000)  # timeout時間設為1分鐘
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
 
