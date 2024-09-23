@@ -12,13 +12,13 @@ max_obstacle_dist = 0
 
 # 是否為有效的坑洞
 def is_hole(od_env, height: int, lateral_dist: float):
-    return abs(lateral_dist) < 500 and height < od_env["highest_hole_height"]
+    return abs(lateral_dist) < od_env["lateral_distance_threshold"] and height < od_env["highest_hole_height"]
 
 
 # 是否為有效的障礙物
 def is_obstacle(od_env, height: int, dist: float, lateral_dist: float):
     return (
-        abs(lateral_dist) < 500
+        abs(lateral_dist) < od_env["lateral_distance_threshold"]
         and od_env["my_height"] + 5 > height > od_env["lowest_obstacle_height"]
         and dist < get_max_obstacle_distance(od_env)
     )

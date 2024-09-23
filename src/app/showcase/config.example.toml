@@ -22,6 +22,7 @@ my_height = 180                     # 身高
 camera_height = 100                 # 攝影機高度
 lowest_obstacle_height = 5          # 最低障礙物高度
 highest_hole_height = -10           # 最高坑洞高度
+lateral_distance_threshold = 500    # 橫向距離閥值
 missing_point_alarm = false         # 缺失點警告
 missing_point_threshold = 10        # 缺失點閥值
 missing_point_alarm_interval = 0.3  # 缺失點警告間隔
@@ -44,6 +45,10 @@ obstacle_preset = [
     { distance = 750, interval = 0.6, name = "中距離" },
     { distance = 1000, interval = 1.0, name = "遠距離" },
 ]
+
+[detect_object]
+max_distance_threshold = 5000       # 最大距離閥值（mm）
+lateral_distance_threshold = 500    # 橫向距離閥值（mm）
 
 [realsense]
 depth_min = 0.11  # 深度攝影機最近深度距離

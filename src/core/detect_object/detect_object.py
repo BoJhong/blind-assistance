@@ -19,7 +19,7 @@ alarmed_objects_time = defaultdict(lambda: 0)
 
 
 class DetectObject:
-    def __init__(self, config: Any, model_path):
+    def __init__(self, config: TOMLConfig, model_path):
         self.model_path = model_path
         self.yolov8 = Yolov8DetectionModel(config, config.env["yolo"]["model"])
         self.detection_times = {}
@@ -77,15 +77,17 @@ class DetectObject:
 
                 height, dist, lateral_dist, depth_point = result
 
-                if dist > 5000:
+                max_dist = TOMLConfig.instance.env["detect_object"]["max_distance_threshold"]
+                if dist > max_dist:
                     continue
 
                 if dist == -1:
                     continue  # 消失點不警報
 
-                if lateral_dist < -500:
+                max_lateral_dist = TOMLConfig.instance.env["detect_object"]["lateral_distance_threshold"]
+                if lateral_dist < -max_lateral_dist:
                     direction = "左側方"
-                elif lateral_dist > 500:
+                elif lateral_dist > max_lateral_dist:
                     direction = "右側方"
                 else:
                     direction = "前方"
