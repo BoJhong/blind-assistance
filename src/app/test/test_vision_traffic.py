@@ -1,30 +1,42 @@
-import os
 import threading
+from pathlib import Path
 
 import cv2
-import imutils
-from PIL import Image
 from cap_from_youtube import cap_from_youtube
+from PIL import Image
+import os
 
 from src.core.alarm.alarm import Alarm
-from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
-    DetectCrosswalkSignal,
-)
-from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
 from src.core.toml_config import TOMLConfig
 from src.core.vision.vision import Vision
 
 config = TOMLConfig(os.path.join(os.path.dirname(__file__), "config.toml"))
 
 alarm = Alarm(config)
-detect_cs = DetectCrosswalkSignal(config)
 vision = Vision(config)
+
+window_name = "Vision Test"
+cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 
 config_env = config.env["config"]
 clicked = False
 
-window_name = "Video Test"
-cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
+frame = None
+vision_response = None
+
+
+def stream_fn(text: str):
+    global vision_response
+    vision_response = text
+
+def slow_processing():
+    global vision, frame, vision_response
+    while 1:
+        if frame is not None:
+            vision_response = vision.predict(Image.fromarray(frame), speak=True, stream=stream_fn)
+
+
+threading.Thread(target=slow_processing).start()
 
 
 def on_mouse(event, x, y, flags, param):
@@ -37,7 +49,7 @@ if config_env["video"].startswith("http"):
     cap = cap_from_youtube(config_env["video"], resolution="720p")
 else:
     video_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', config_env["video"])
-    if not os.path.exists(video_path):
+    if not Path(video_path).exists():
         raise FileNotFoundError(f"Source path {video_path} does not exist.")
     cap = cv2.VideoCapture(video_path)
 
@@ -53,9 +65,11 @@ while cap.isOpened() and cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE
         count += config.env["config"]["skip_frame"]
         cap.set(cv2.CAP_PROP_POS_FRAMES, count)
 
-    combined_img = imutils.resize(frame.copy(), height=720)
+    vision_image = frame.copy()
+    if vision_response is not None:
+        vision_image = vision.draw(vision_image, vision_response)
 
-    cv2.imshow(window_name, combined_img)
+    cv2.imshow(window_name, vision_image)
 
     cv2.setMouseCallback(window_name, on_mouse)
     key = cv2.waitKey(1)
@@ -64,5 +78,3 @@ while cap.isOpened() and cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE
         cap.release()
         cv2.destroyAllWindows()
         break
-    if key & 0xFF == ord("v"):
-        vision.predict(Image.fromarray(frame), translate=True)

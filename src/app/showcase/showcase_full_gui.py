@@ -102,6 +102,10 @@ def update_frame(main_window: Gui):
         return
 
     bottom_point, camera_height = RealsenseCamera.instance.auto_camera_height(depth_frame)
+    # if camera_height is not None:
+    #     config.env["obstacle_detection"]["camera_height"] = camera_height
+    #     Gui.instance.camera_height_slider.setValue(camera_height)
+    #     Gui.instance.statusbar.showMessage(f'攝影機高度已調整為: {camera_height}')
 
     depth_image = np.asanyarray(depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
@@ -132,8 +136,8 @@ def update_frame(main_window: Gui):
         )
 
     frame_number = frames.get_frame_number()
-    if yolov8_sahi:
-        slow_processing(color_image, depth_image, frame_number)
+    # if yolov8_sahi:
+    #     slow_processing(color_image, depth_image, frame_number)
 
     global dcs_img
     if dcs_img is None:

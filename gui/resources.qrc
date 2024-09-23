@@ -1,9 +1,14 @@
 <RCC>
   <qresource>
+    <file>img/logo.png</file>
+    <file>img/chat_dark.png</file>
+    <file>img/chat_light.png</file>
     <file>img/camera_light.png</file>
     <file>img/camera_dark.png</file>
     <file>img/alarm_dark.png</file>
     <file>img/alarm_light.png</file>
+    <file>img/play_light.png</file>
+    <file>img/stop_dark.png</file>
     <file>img/mic_dark.png</file>
     <file>img/playback_dark.png</file>
     <file>img/green_light.png</file>

@@ -81,6 +81,8 @@ class Gui(QMainWindow):
         self.update_frame_func = update_frame_func
 
         self.playback_widget.setVisible(False)
+        self.red_light_btn.setVisible(False)
+        self.green_light_btn.setVisible(False)
 
         self.setting_btn.clicked.connect(self.setting)
 
@@ -95,6 +97,11 @@ class Gui(QMainWindow):
         self.green_light_btn.clicked.connect(self.set_green_light)
         self.red_light_btn.clicked.connect(self.set_red_light)
         self.adjust_camera_height_btn.clicked.connect(self.adjust_camera_height)
+        self.chat_btn.clicked.connect(self.toggle_chat)
+
+        self.chat_btn.setChecked(False)
+        self.chat_widget.setVisible(False)
+        self.chat_btn.setText('開啟對話欄')
 
         self.is_streaming = False
         self.realsense_thread = RealSenseThread(self.config, self.update_frame_func)
@@ -206,7 +213,9 @@ class Gui(QMainWindow):
         threading.Thread(target=Vision.instance.predict, args=(
             Image.fromarray(self.color_image),
             self.prompt_input.text(),
-            prompt_stream_fn, True)
+            prompt_stream_fn,
+            True,
+            True,)
         ).start()
         # response = Vision.instance.predict(
         #     Image.fromarray(self.color_image),
@@ -263,6 +272,14 @@ class Gui(QMainWindow):
         else:
             self.statusbar.showMessage(f'攝影機高度已調整為: {camera_height}')
             self.camera_height_slider.setValue(camera_height)
+
+    def toggle_chat(self):
+        if self.chat_btn.isChecked():
+            self.chat_btn.setText('關閉對話欄')
+            self.chat_widget.setVisible(True)
+        else:
+            self.chat_btn.setText('開啟對話欄')
+            self.chat_widget.setVisible(False)
 
 
 def prompt_stream_fn(text):

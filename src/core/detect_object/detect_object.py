@@ -8,6 +8,7 @@ import numpy as np
 
 from src.core.alarm.alarm import Alarm
 from src.core.detect_crosswalk_signal.detect_crosswalk_signal import DetectCrosswalkSignal
+from src.core.gui.gui import Gui
 from src.core.models.class_names import class_names
 from src.core.models.yolov8 import Yolov8DetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
@@ -76,15 +77,15 @@ class DetectObject:
 
                 height, dist, lateral_dist, depth_point = result
 
-                if dist > 1500:
+                if dist > 5000:
                     continue
 
                 if dist == -1:
                     continue  # 消失點不警報
 
-                if lateral_dist < -150:
+                if lateral_dist < -500:
                     direction = "左側方"
-                elif lateral_dist > 150:
+                elif lateral_dist > 500:
                     direction = "右側方"
                 else:
                     direction = "前方"
@@ -131,6 +132,9 @@ class DetectObject:
         threading.Thread(target=self._speak, args=(f"{direction}{dist_str}有{name}{track_id}",)).start()
 
     def _speak(self, message):
+        if Gui.instance is not None:
+            Gui.instance.statusbar.showMessage(message)
+
         Alarm.instance.speak(message)
         self.speaking = False
         self.last_alarm_time = int(time.time() * 1000)

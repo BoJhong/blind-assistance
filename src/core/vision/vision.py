@@ -5,7 +5,6 @@ import cv2
 import torch
 from deep_translator import GoogleTranslator
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
-from googletrans import Translator
 from src.core.alarm.tts import TTS
 from src.utils.opencv import draw_multiline_text_with_border
 
@@ -18,7 +17,7 @@ class Vision:
         # self.config = config.env["vision"]
 
         model_id = "vikhyatk/moondream2"
-        revision = "2024-05-20"
+        revision = "2024-08-26"
         device = "cuda:0" if torch.cuda.is_available() else "cpu"
         print("推理裝置: {}".format(device))
         dtype = torch.float32 if device == "cpu" else torch.float16  # CPU doesn't support float16
@@ -29,16 +28,19 @@ class Vision:
             trust_remote_code=True,
             revision=revision,
             torch_dtype=dtype,
-            low_cpu_mem_usage=True,
-            use_safetensors=True,
+            # low_cpu_mem_usage=True,
+            # use_safetensors=True,
             # attn_implementation="flash_attention_2",
-            device_map="cuda:0"
+            device_map="cuda:0",
         ).to(device=device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
         print(f"Model loaded: {model_id}")
 
-    def predict(self, image, prompt="Describe this image.", stream=None, speak=False):
-        prompt = GoogleTranslator(target='en').translate(prompt)
+    def predict(self, image, prompt="Describe this image.", stream=None, speak=False, translate=False):
+        if translate:
+            prompt = GoogleTranslator(target='en').translate(prompt)
+        print(prompt)
+
         enc_image = self.model.encode_image(image)
         response = self.answer_question(enc_image, prompt)
         result = ''
@@ -47,11 +49,19 @@ class Vision:
                 continue
 
             result = txt
+            print(txt)
+            print("test")
             if stream is not None:
                 stream(txt)
 
-        result = GoogleTranslator(source='en', target='zh-TW').translate(result)
-        stream(result)
+        if translate:
+            print(result)
+            result = GoogleTranslator(source='en', target='zh-TW').translate(result)
+
+        if stream is not None:
+            stream(result)
+
+        print(result)
 
         if speak and TTS.instance is not None:
             threading.Thread(target=TTS.instance, args=(result,)).start()

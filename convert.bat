@@ -1,1 +1,1 @@
-pyrcc5 -o src/core/gui/resources.py gui/resources.qrc
+pyrcc5 -o gui/compiled_resources.py gui/resources.qrc

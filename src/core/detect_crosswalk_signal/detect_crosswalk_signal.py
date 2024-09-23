@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Any
 
 import cv2
+import imutils
 from PIL import Image
 
 from .utils import find_nearest
@@ -67,6 +68,8 @@ class DetectCrosswalkSignal:
     def vision_countdown(self, image):
         start_time = time.time()  # 紀錄開始計算的時間
         prompt = "Please tell me the countdown seconds of the pedestrian signal closest to the center of the screen (only answer with a number)."
+        # img = Image.fromarray(imutils.resize(image, height=480))
+        # response = Vision.instance.predict(img, prompt).strip()
         response = Vision.instance.predict(Image.fromarray(image), prompt).strip()
         end_time = time.time()
         second = int(response) if response.isdigit() else 0

@@ -14,3 +14,5 @@ pillow~=10.3.0
 einops
 pyttsx3
 sounddevice
+deep_translator
+# accelerate

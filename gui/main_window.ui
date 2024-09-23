@@ -7,11 +7,16 @@
     <x>0</x>
     <y>0</y>
     <width>960</width>
-    <height>518</height>
+    <height>554</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">statusbar {
+	background-color: rgb(0, 255, 0);
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
@@ -40,9 +45,13 @@ QPushButton:checked {
 	background-color: #cee8ff;
 	color: #222831;
 	font-weight: bold;
+}
+
+#prompt_input {
+	background: #374357;
 }</string>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,5">
+   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,5,2">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -107,58 +116,62 @@ QPushButton:checked {
         <number>0</number>
        </property>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <property name="leftMargin">
-          <number>9</number>
-         </property>
-         <property name="topMargin">
-          <number>9</number>
-         </property>
-         <property name="rightMargin">
-          <number>9</number>
-         </property>
-         <property name="bottomMargin">
-          <number>9</number>
-         </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QLabel" name="name_1">
-           <property name="font">
-            <font>
-             <family>微軟正黑體</family>
-             <pointsize>16</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <property name="leftMargin">
+            <number>9</number>
            </property>
-           <property name="styleSheet">
-            <string notr="true">color: #AAE3E2;</string>
+           <property name="topMargin">
+            <number>9</number>
            </property>
-           <property name="text">
-            <string>盲人輔助系統</string>
+           <property name="rightMargin">
+            <number>9</number>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="bottomMargin">
+            <number>9</number>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="name_2">
-           <property name="font">
-            <font>
-             <family>微軟正黑體</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: #AAE3E2;</string>
-           </property>
-           <property name="text">
-            <string>Blind Assistance</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
+           <item>
+            <widget class="QLabel" name="name_1">
+             <property name="font">
+              <font>
+               <family>微軟正黑體</family>
+               <pointsize>16</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: #AAE3E2;</string>
+             </property>
+             <property name="text">
+              <string>盲人輔助系統</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="name_2">
+             <property name="font">
+              <font>
+               <family>微軟正黑體</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: #AAE3E2;</string>
+             </property>
+             <property name="text">
+              <string>Blind Assistance</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -183,6 +196,11 @@ QPushButton:checked {
            </property>
            <property name="text">
             <string>啟動</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/img/play_light.png</normaloff>
+             <normalon>:/img/stop_dark.png</normalon>:/img/play_light.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -545,7 +563,8 @@ QSlider::add-page:horizontal {
             </font>
            </property>
            <property name="text">
-            <string>距離最近的障礙</string>
+            <string>距離最近的障礙
+無</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -556,6 +575,42 @@ QSlider::add-page:horizontal {
        </item>
        <item>
         <layout class="QVBoxLayout" name="bottom_menu_btns">
+         <item>
+          <widget class="QPushButton" name="chat_btn">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <family>微軟正黑體</family>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>開啟對話欄</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/img/chat_light.png</normaloff>
+             <normalon>:/img/chat_dark.png</normalon>:/img/chat_light.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="autoExclusive">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPushButton" name="setting_btn">
            <property name="sizePolicy">
@@ -653,25 +708,6 @@ QSlider::add-page:horizontal {
             <number>0</number>
            </property>
            <item>
-            <widget class="QLabel" name="vision_response_label">
-             <property name="font">
-              <font>
-               <family>微軟正黑體</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">line-height: 20px;</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="wordWrap">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
             <layout class="QGridLayout" name="images_grid">
              <property name="spacing">
               <number>0</number>
@@ -701,10 +737,13 @@ QSlider::add-page:horizontal {
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="image_label_3">
+             <item row="1" column="1">
+              <widget class="QLabel" name="image_label_4">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                  <horstretch>1</horstretch>
                  <verstretch>1</verstretch>
                 </sizepolicy>
@@ -754,13 +793,10 @@ QSlider::add-page:horizontal {
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QLabel" name="image_label_4">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
+             <item row="1" column="0">
+              <widget class="QLabel" name="image_label_3">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                  <horstretch>1</horstretch>
                  <verstretch>1</verstretch>
                 </sizepolicy>
@@ -783,25 +819,6 @@ QSlider::add-page:horizontal {
               </widget>
              </item>
             </layout>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="prompt_input">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <family>微軟正黑體</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="frame">
-              <bool>false</bool>
-             </property>
-            </widget>
            </item>
           </layout>
          </widget>
@@ -1078,9 +1095,72 @@ QPushButton:checked {
       </layout>
      </widget>
     </item>
+    <item>
+     <widget class="QWidget" name="chat_widget" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="vision_response_label">
+         <property name="font">
+          <font>
+           <family>微軟正黑體</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">line-height: 20px;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="prompt_input">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>微軟正黑體</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="frame">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true">background-color : #0F1C2E; color: white;</string>
+   </property>
+  </widget>
  </widget>
  <resources>
   <include location="resources.qrc"/>
