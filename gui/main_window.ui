@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>960</width>
-    <height>554</height>
+    <height>560</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1128,6 +1128,21 @@ QPushButton:checked {
           <string/>
          </property>
          <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="text">
+          <string> 語音輸入</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>img/mic_light.png</normaloff>
+           <normalon>:/img/mic_dark.png</normalon>img/mic_light.png</iconset>
+         </property>
+         <property name="checkable">
           <bool>true</bool>
          </property>
         </widget>

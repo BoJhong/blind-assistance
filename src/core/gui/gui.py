@@ -1,6 +1,8 @@
+import os
 import threading
 from time import sleep
 
+import cv2
 from PIL import Image
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
@@ -55,6 +57,56 @@ class RealSenseThread(QThread):
         Gui.instance.toggle_camera_btn.setEnabled(True)
         Gui.instance.toggle_camera_btn.setChecked(False)
 
+class VideoCaptureThread(QThread):
+    frame_data_signal = pyqtSignal(str)
+
+    def __init__(self, config, run_func, file=None):
+        super().__init__()
+        self.config = config
+        self.run_func = run_func
+        self.file = file
+        self.is_running = False
+
+        if self.file is None:
+            self.file = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources',
+                                     self.config.env["config"]["video"])
+
+    def run(self):
+        try:
+            if not os.path.exists(self.file):
+                Gui.instance.statusbar.showMessage(f"影片檔案不存在：{self.file}")
+                Gui.instance.toggle_camera_btn.setText('啟動')
+                Gui.instance.toggle_camera_btn.setEnabled(True)
+                Gui.instance.toggle_camera_btn.setChecked(False)
+                return
+
+            self.is_running = True
+            self.cap = cv2.VideoCapture(self.file)
+
+            Gui.instance.toggle_camera_btn.setText('停止')
+            Gui.instance.statusbar.showMessage(f"正在播放 {self.config.env['config']['video']}")
+            Gui.instance.is_streaming = True
+            Gui.instance.toggle_camera_btn.setEnabled(True)
+            Gui.instance.toggle_camera_btn.setChecked(True)
+
+            while self.is_running and self.cap.isOpened():
+                try:
+                    self.run_func(self.cap)
+                except Exception as e:
+                    print(e)
+                    self.frame_data_signal.emit(f'錯誤: {e}')
+
+        except Exception as e:
+            print(e)
+            self.frame_data_signal.emit(f'錯誤: {e}')
+
+    def stop(self):
+        self.is_running = False
+        Gui.instance.toggle_camera_btn.setText('啟動')
+        Gui.instance.statusbar.showMessage('已停止播放影片！')
+        Gui.instance.is_streaming = False
+        Gui.instance.toggle_camera_btn.setEnabled(True)
+        Gui.instance.toggle_camera_btn.setChecked(False)
 
 class VisionThread(QThread):
     def __init__(self, image, prompt_input, speak):
@@ -73,12 +125,13 @@ class VisionThread(QThread):
 class Gui(QMainWindow):
     instance = None
 
-    def __init__(self, config, update_frame_func):
+    def __init__(self, config, update_frame_func, is_video_capture=False):
         Gui.instance = self
         super(Gui, self).__init__()
         loadUi("gui/main_window.ui", self)
         self.config = config
         self.update_frame_func = update_frame_func
+        self.is_video_capture = is_video_capture
 
         self.playback_widget.setVisible(False)
         self.red_light_btn.setVisible(False)
@@ -104,8 +157,12 @@ class Gui(QMainWindow):
         self.chat_btn.setText('開啟對話欄')
 
         self.is_streaming = False
-        self.realsense_thread = RealSenseThread(self.config, self.update_frame_func)
-        self.realsense_thread.frame_data_signal.connect(self.update_status)
+        if is_video_capture:
+            self.video_capture_thread = VideoCaptureThread(self.config, self.update_frame_func)
+            self.video_capture_thread.frame_data_signal.connect(self.update_status)
+        else:
+            self.realsense_thread = RealSenseThread(self.config, self.update_frame_func)
+            self.realsense_thread.frame_data_signal.connect(self.update_status)
 
         self.body_height_slider.valueChanged.connect(self.set_body_height)
         self.camera_height_slider.valueChanged.connect(self.set_camera_height)
@@ -118,11 +175,17 @@ class Gui(QMainWindow):
 
     def start_camera(self):
         if not self.is_streaming:
-            self.realsense_thread.start()
+            if self.is_video_capture:
+                self.video_capture_thread.start()
+            else:
+                self.realsense_thread.start()
 
     def stop_camera(self):
         if self.is_streaming:
-            self.realsense_thread.stop()
+            if self.is_video_capture:
+                self.video_capture_thread.stop()
+            else:
+                self.realsense_thread.stop()
 
     def create_click_handler(self, label):
         def handle_click(event):
@@ -184,7 +247,10 @@ class Gui(QMainWindow):
             if self.replay_btn.isChecked():
 
                 # 使用 QFileDialog 讓用戶選擇 bag 檔案
-                file_name, _ = QFileDialog.getOpenFileName(self, "選擇要回放的檔案", "", "Bag Files (*.bag)")
+                if self.is_video_capture:
+                    file_name, _ = QFileDialog.getOpenFileName(self, "選擇要回放的檔案", "", "Video Files (*.mp4 *.avi *.mkv *.mov)")
+                else:
+                    file_name, _ = QFileDialog.getOpenFileName(self, "選擇要回放的檔案", "", "Bag Files (*.bag)")
 
                 if not file_name:
                     self.replay_btn.setChecked(False)
@@ -192,12 +258,21 @@ class Gui(QMainWindow):
                 # 如果用戶選擇了文件，啟動回放模式
                 self.statusbar.showMessage(f'正在回放: {file_name}')
 
-                if self.realsense_thread and self.realsense_thread.is_running:
-                    self.realsense_thread.stop()
-                    self.realsense_thread.wait()
+                if self.is_video_capture:
+                    if self.video_capture_thread and self.video_capture_thread.is_running:
+                        self.video_capture_thread.stop()
+                        self.video_capture_thread.wait()
 
-                self.realsense_thread = RealSenseThread(self.config, self.update_frame_func, file=file_name)
-                self.realsense_thread.start()
+                    self.video_capture_thread = VideoCaptureThread(self.config, self.update_frame_func, file=file_name)
+                    self.video_capture_thread.start()
+                else:
+                    if self.realsense_thread and self.realsense_thread.is_running:
+                        self.realsense_thread.stop()
+                        self.realsense_thread.wait()
+
+                    self.realsense_thread = RealSenseThread(self.config, self.update_frame_func, file=file_name)
+                    self.realsense_thread.start()
+
                 self.replay_btn.setText('播放回放')
             else:
                 if self.realsense_thread and self.realsense_thread.is_running:

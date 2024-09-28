@@ -34,6 +34,7 @@ class DetectObject:
         for class_id, box, score, track_id in prediction_list:
             class_name = self.yolov8.category[class_id]
             if class_name == "traffic light":  # 不警報紅綠燈
+                prediction_list.remove((class_id, box, score, track_id))
                 continue
 
             track = track_history[track_id]
@@ -141,7 +142,7 @@ class DetectObject:
         self.speaking = False
         self.last_alarm_time = int(time.time() * 1000)
 
-    def draw_detections(self, image, prediction_list, depth_image, mask_alpha: float = 0.4):
+    def draw_detections(self, image, prediction_list, depth_image = None, mask_alpha: float = 0.4):
         # for track_id in track_history:
         #     for box in track_history[track_id]:
         #         x, y, w, h = box
