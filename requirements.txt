@@ -15,4 +15,5 @@ einops
 pyttsx3
 sounddevice
 deep_translator
+speechrecognition
 # accelerate

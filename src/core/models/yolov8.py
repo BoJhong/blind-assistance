@@ -18,6 +18,7 @@ class Yolov8DetectionModel(DetectionModel):
         （需要利用self.model_path、self.config_path和self.device）
         """
         self.set_model(YOLO(self.model_path))
+        print(f"Model loaded: {self.model_path}")
 
     def set_model(self, model: Any):
         """

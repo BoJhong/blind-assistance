@@ -44,54 +44,40 @@ last_process_frame = 0
 blurry = False
 slow_thread = None
 finished = True
-frame_number = 0
 
+class SlowProcessThread(Thread):
+    def __init__(self, image, n):
+        super().__init__()
+        self.is_running = False
+        self.image = image
+        self.n = n
 
-def slow_processing(image, n):
-    global blurry, last_process_frame, finished
-    if not finished:
-        return
+    def run(self):
+        self.is_running = True
+        while self.is_running:
+            global dcs_img
+            image = Gui.instance.color_image.copy()
+            sahi_prediction_list = yolov8_sahi(image)
 
-    mean = None
-    # if detect_cs.is_none():
-    #     if n % 15 != 0 and not blurry:
-    #         return
-    #
-    #     (mean, blurry) = detect_blur_fft(image)
-    #     if blurry and n // 15 - last_process_frame < 5:
-    #         return
+            if len(sahi_prediction_list) > 0:
+                nearst_box = detect_cs(image, sahi_prediction_list, yolov8_sahi.category)
+                if nearst_box is not None:
+                    image = detect_cs.draw_line(image, nearst_box)
+                image = yolov8_sahi.draw_detections(image, sahi_prediction_list)
+            else:
+                detect_cs.invalid()
 
-    last_process_frame = n // 15
-    finished = False
+            dcs_img = image
 
-    def fn():
-        global dcs_img, blurry, frame_number, finished
-        img = image.copy()
-
-        if mean is not None:
-            img = draw_blur_status(image, mean, blurry)
-
-        sahi_prediction_list = yolov8_sahi(image)
-        finished = True
-
-        if len(sahi_prediction_list) > 0:
-            nearst_box = detect_cs(image, sahi_prediction_list, yolov8_sahi.category)
-            if nearst_box is not None:
-                img = detect_cs.draw_line(img, nearst_box)
-            img = yolov8_sahi.draw_detections(img, sahi_prediction_list, depth_image)
-        else:
-            detect_cs.invalid()
-
-        dcs_img = img
-
-    Thread(target=fn).start()
+    def stop(self):
+        self.is_running = False
 
 
 count = 0
 current_frame_index = 0
 
 def update_frame(cap):
-    global count, current_frame_index, dcs_img
+    global count, current_frame_index, dcs_img, slow_thread
     start_time = time.time()
 
     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -103,10 +89,6 @@ def update_frame(cap):
             current_frame_index = 0
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             return
-        elapsed_time = time.time() - start_time
-        current_frame_index += int(elapsed_time // frame_time) + 1
-        print(f"FPS: {current_frame_index}")
-        cap.set(cv2.CAP_PROP_POS_FRAMES, current_frame_index)
         Gui.instance.color_image = frame.copy()
 
     prediction_list = detect_object(frame)
@@ -117,8 +99,9 @@ def update_frame(cap):
             detect_object_img, prediction_list
         )
 
-    # if yolov8_sahi:
-    #     slow_processing(color_image, depth_image, frame_number)
+    if yolov8_sahi and slow_thread is None:
+        slow_thread = SlowProcessThread(frame, count)
+        slow_thread.start()
 
     if dcs_img is None:
         dcs_img = frame.copy()
@@ -128,6 +111,12 @@ def update_frame(cap):
     Gui.instance.display_image(detect_object_img, 0)
     Gui.instance.display_image(dcs_img, 1)
     # main_window.display_image(heatmap, 3)
+
+    if Gui.instance.is_streaming:
+        elapsed_time = time.time() - start_time
+        current_frame_index += int(elapsed_time // frame_time) + 1
+        print(f"FPS: {current_frame_index}")
+        cap.set(cv2.CAP_PROP_POS_FRAMES, current_frame_index)
 
 
 gui = Gui(config, update_frame, is_video_capture=True)

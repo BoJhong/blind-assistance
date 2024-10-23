@@ -12,7 +12,33 @@ from PyQt5.uic import loadUi
 import gui.compiled_resources  # type: ignore
 from src.core.alarm.tts import TTS
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
+from src.core.speech_recognition.speech_recognition import SpeechRecognition
 from src.core.vision.vision import Vision
+
+class SpeechThread(QThread):
+    frame_data_signal = pyqtSignal(str)
+    def __init__(self):
+        super().__init__()
+        self.is_running = False
+
+    def run(self):
+        try:
+            self.is_running = True
+            speech_recognition = SpeechRecognition()
+
+            while self.is_running:
+                try:
+                    text = speech_recognition()
+                    if text != '':
+                        print(text)
+                        Gui.instance.prompt_input.setText(text)
+                except Exception as e:
+                    pass
+        except Exception as e:
+            self.frame_data_signal.emit(f'錯誤: {e}')
+
+    def stop(self):
+        self.is_running = False
 
 
 class RealSenseThread(QThread):
@@ -151,6 +177,7 @@ class Gui(QMainWindow):
         self.red_light_btn.clicked.connect(self.set_red_light)
         self.adjust_camera_height_btn.clicked.connect(self.adjust_camera_height)
         self.chat_btn.clicked.connect(self.toggle_chat)
+        self.speech_btn.clicked.connect(self.toggle_speech)
 
         self.chat_btn.setChecked(False)
         self.chat_widget.setVisible(False)
@@ -355,6 +382,17 @@ class Gui(QMainWindow):
         else:
             self.chat_btn.setText('開啟對話欄')
             self.chat_widget.setVisible(False)
+
+    def toggle_speech(self):
+        if self.speech_btn.isChecked():
+            self.speech_thread = SpeechThread()
+            self.speech_thread.start()
+            self.speech_thread.frame_data_signal.connect(self.update_status)
+        else:
+            if self.speech_thread and self.speech_thread.is_running:
+                self.speech_thread.stop()
+
+
 
 
 def prompt_stream_fn(text):
