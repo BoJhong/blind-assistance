@@ -7,10 +7,9 @@ from .base import DetectionModel
 
 
 class Yolov8DetectionModel(DetectionModel):
-    def load_env(self, config: Any):
+    def load_env(self, config: Any, confidence_threshold: float = 0.5):
         self.yolo_env = config.env["yolo"]
-        if self.yolo_env["confidence_threshold"] is not None:
-            self.confidence_threshold = self.yolo_env["confidence_threshold"]
+        self.confidence_threshold = confidence_threshold
 
     def load_model(self):
         """ "
@@ -67,7 +66,7 @@ class Yolov8DetectionModel(DetectionModel):
 
         return list(zip(class_ids, boxes, scores, track_ids))
 
-    def __call__(self, img: np.ndarray, track_history):
+    def __call__(self, img: np.ndarray, track_history=None):
         """
         預測圖片中的物件（track函數必須傳入 persist=True ，否則畫面都是單獨運算）
         :param img: 圖片

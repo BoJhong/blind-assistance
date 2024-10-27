@@ -9,9 +9,10 @@ from src.core.models.base import DetectionModel
 
 
 class Yolov8SahiDetectionModel(DetectionModel):
-    def load_env(self, config: Any):
+    def load_env(self, config: Any, confidence_threshold: float = 0.5):
         self.yolo_env = config.env["yolo"]
         self.sahi_env = config.env["sahi"]
+        self.confidence_threshold = confidence_threshold
 
     def load_model(self):
         self.set_model(
@@ -19,7 +20,7 @@ class Yolov8SahiDetectionModel(DetectionModel):
             AutoDetectionModel.from_pretrained(
                 model_type="yolov8",
                 model_path=self.model_path,
-                confidence_threshold=self.yolo_env["confidence_threshold"],
+                confidence_threshold=self.confidence_threshold,
             ),
         )
         print(f"Model loaded: {self.model_path}")

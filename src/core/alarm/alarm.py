@@ -22,6 +22,7 @@ class Alarm:
         self.duration = 1
         self.frequency = 2500
         self.loop = False
+        self.disable = False
 
         # self.pwm = buzzer.setup()
 
@@ -57,13 +58,13 @@ class Alarm:
         threading.Thread(target=self.speak, args=(message,)).start()
 
     def start(self, message: str = "警報！", duration: float = 1, frequency: int = 2500):
+        if self.disable or self.exec_status:
+            return
+
+        self.exec_status = True
         self.duration = duration
         self.frequency = frequency
         self.message = message
-
-        if self.exec_status:
-            return
-        self.exec_status = True
 
         # 建立並執行子執行緒
         if not self.loop:
@@ -71,12 +72,15 @@ class Alarm:
 
     def _exec_loop(self):
         self.loop = True
-        while self.exec_status:
+        while self.exec_status and not self.disable:
             self.play_sound(self.frequency, self.duration)
             if self.alarm_env["print"] and self.message is not None:
                 logging.info(self.message)
             time.sleep(self.duration * 2)
         self.loop = False
+
+        if self.disable:
+            self.stop()
 
     def stop(self):
         if not self.exec_status:

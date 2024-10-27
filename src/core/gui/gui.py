@@ -10,10 +10,12 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from PyQt5.uic import loadUi
 
 import gui.compiled_resources  # type: ignore
+from src.core.alarm.alarm import Alarm
 from src.core.alarm.tts import TTS
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
 from src.core.speech_recognition.speech_recognition import SpeechRecognition
 from src.core.vision.vision import Vision
+import time
 
 class SpeechThread(QThread):
     frame_data_signal = pyqtSignal(str)
@@ -65,8 +67,21 @@ class RealSenseThread(QThread):
                 try:
                     self.run_func(Gui.instance)
                 except Exception as e:
-                    print(e)
+                    print(f"錯誤: {e}")
                     self.frame_data_signal.emit(f'錯誤: {e}')
+
+                    Alarm.instance.stop()
+
+                    # 屎山
+                    while self.is_running:
+                        try:
+                            # 嘗試重新啟動攝影機
+                            self.rs_camera.profile = self.rs_camera.pipeline.start(self.rs_camera.config)
+                            print("攝影機重新連線成功")
+                            reconnected = True
+                            break
+                        except Exception:
+                            time.sleep(1)
 
         except Exception as e:
             print(e)
@@ -82,6 +97,7 @@ class RealSenseThread(QThread):
         Gui.instance.is_streaming = False
         Gui.instance.toggle_camera_btn.setEnabled(True)
         Gui.instance.toggle_camera_btn.setChecked(False)
+        Alarm.instance.stop()
 
 class VideoCaptureThread(QThread):
     frame_data_signal = pyqtSignal(str)
@@ -178,6 +194,8 @@ class Gui(QMainWindow):
         self.adjust_camera_height_btn.clicked.connect(self.adjust_camera_height)
         self.chat_btn.clicked.connect(self.toggle_chat)
         self.speech_btn.clicked.connect(self.toggle_speech)
+        self.alarm_btn.clicked.connect(self.toggle_alarm)
+        self.tts_btn.clicked.connect(self.toggle_tts)
 
         self.chat_btn.setChecked(False)
         self.chat_widget.setVisible(False)
@@ -391,6 +409,22 @@ class Gui(QMainWindow):
         else:
             if self.speech_thread and self.speech_thread.is_running:
                 self.speech_thread.stop()
+
+    def toggle_alarm(self):
+        if self.alarm_btn.isChecked():
+            self.alarm_btn.setText('關閉警示音')
+            Alarm.instance.disable = False
+        else:
+            self.alarm_btn.setText('開啟警示音')
+            Alarm.instance.disable = True
+
+    def toggle_tts(self):
+        if self.tts_btn.isChecked():
+            self.tts_btn.setText('關閉語音播報')
+            TTS.exec_status = True
+        else:
+            self.tts_btn.setText('開啟語音播報')
+            TTS.exec_status = False
 
 
 

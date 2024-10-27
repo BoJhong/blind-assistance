@@ -15,7 +15,7 @@ from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
 from src.core.detect_object.detect_object import DetectObject
 from src.core.detect_obstacle.detect_obstacle import DetectObstacle
 from src.core.gui.gui import Gui
-from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
+from src.core.models.yolov8 import Yolov8DetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
 from src.core.toml_config import TOMLConfig
 from src.core.vision.vision import Vision
@@ -31,7 +31,7 @@ yolov8_sahi = None
 
 def init_thread():
     global vision, yolov8_sahi
-    yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
+    yolov8_sahi = Yolov8DetectionModel(config, config.env["yolo"]["cs_model"])
     vision = Vision(config)
 
 

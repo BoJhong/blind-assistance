@@ -1,8 +1,9 @@
+/resources/*.mp4
+/models/
+
 *.pyc
 .vscode/
-resources/*.mp4
 site-packages/
-/models/
 *.toml
 !config.example.toml
 .env

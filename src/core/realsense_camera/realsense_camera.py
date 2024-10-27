@@ -40,6 +40,10 @@ class RealsenseCamera:
         self.roll = 0
 
         depth_sensor = self.profile.get_device().first_depth_sensor()
+        # 關閉自動曝光 並且不是唯讀的
+        if file is None and depth_sensor.supports(rs.option.enable_auto_exposure):
+            depth_sensor.set_option(rs.option.enable_auto_exposure, False)
+
         self.depth_scale = depth_sensor.get_depth_scale()
 
         (

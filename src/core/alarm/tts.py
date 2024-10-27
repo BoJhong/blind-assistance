@@ -13,6 +13,7 @@ splits = {"，", "。", "？", "！", ",", ".", "?", "!", "~", ":", "：", "—"
 
 class TTS:
     instance = None
+    exec_status = True
 
     def __init__(self, alarm_env: Any):
         TTS.instance = self
@@ -20,12 +21,17 @@ class TTS:
         self.alarm_env = alarm_env
         self.pyAudio = pyaudio.PyAudio()
         self.engine = pyttsx3.init()
-        self.engine.setProperty('rate', 250)
+        self.engine.setProperty('rate', 150)
 
     def __call__(self, message):
-        # threading.Thread(target=self.get_audio, args=(message,)).start()
-        self.engine.say(message)
-        self.engine.runAndWait()
+        if not TTS.exec_status:
+            return
+
+        if self.alarm_env["tts_mode"] == "ai":
+            threading.Thread(target=self.get_audio, args=(message,)).start()
+        else:
+            self.engine.say(message)
+            self.engine.runAndWait()
 
     def get_audio(self, message):
         data = {

@@ -16,12 +16,14 @@ from src.core.toml_config import TOMLConfig
 
 track_history = defaultdict(lambda: [])
 alarmed_objects_time = defaultdict(lambda: 0)
+object_whitelist = ["person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat"]
 
 
 class DetectObject:
     def __init__(self, config: TOMLConfig, model_path):
+        self.do_env = config.env["detect_object"]
         self.model_path = model_path
-        self.yolov8 = Yolov8DetectionModel(config, config.env["yolo"]["model"])
+        self.yolov8 = Yolov8DetectionModel(config, config.env["yolo"]["model"], self.do_env["confidence_threshold"])
         self.detection_times = {}
         self.last_alarm_time = 0
         self.object_queue = []
@@ -33,7 +35,8 @@ class DetectObject:
 
         for class_id, box, score, track_id in prediction_list:
             class_name = self.yolov8.category[class_id]
-            if class_name == "traffic light":  # 不警報紅綠燈
+            if class_name not in object_whitelist:
+                print(f"not in whitelist: {class_name}")
                 prediction_list.remove((class_id, box, score, track_id))
                 continue
 

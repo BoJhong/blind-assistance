@@ -71,7 +71,7 @@ def slow_processing(image, depth_image, n):
         if mean is not None:
             img = draw_blur_status(image, mean, blurry)
 
-        sahi_prediction_list = yolov8_sahi(image)
+        sahi_prediction_list = yolov8_sahi(image, config.env["detect_crosswalk_signal"]["confidence_threshold"])
         finished = True
 
         if len(sahi_prediction_list) > 0:
@@ -90,7 +90,7 @@ def slow_processing(image, depth_image, n):
 def update_frame(main_window: Gui):
     if RealsenseCamera.instance is None:
         return
-    frames = RealsenseCamera.instance.pipeline.wait_for_frames(60 * 1000)  # timeout時間設為1分鐘
+    frames = RealsenseCamera.instance.pipeline.wait_for_frames(2000)
     depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
 

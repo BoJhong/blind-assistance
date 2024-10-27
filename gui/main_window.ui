@@ -690,6 +690,9 @@ QSlider::add-page:horizontal {
          <property name="enabled">
           <bool>true</bool>
          </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
          <widget class="QWidget" name="main_page">
           <layout class="QVBoxLayout" name="verticalLayout">
            <property name="spacing">
@@ -1049,6 +1052,9 @@ QPushButton:checked {
               <property name="checkable">
                <bool>true</bool>
               </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
               <property name="autoExclusive">
                <bool>false</bool>
               </property>
@@ -1083,6 +1089,9 @@ QPushButton:checked {
                </size>
               </property>
               <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
                <bool>true</bool>
               </property>
              </widget>
