@@ -14,6 +14,7 @@ from src.core.detect_crosswalk_signal.detect_crosswalk_signal import (
 from src.core.detect_object.detect_object import DetectObject
 from src.core.detect_obstacle.detect_obstacle import DetectObstacle
 from src.core.gui.gui import Gui
+from src.core.models.yolov8 import Yolov8DetectionModel
 from src.core.models.yolov8sahi import Yolov8SahiDetectionModel
 from src.core.realsense_camera.realsense_camera import RealsenseCamera
 from src.core.toml_config import TOMLConfig
@@ -31,7 +32,9 @@ yolov8_sahi = None
 
 def init_thread():
     global vision, yolov8_sahi
-    yolov8_sahi = Yolov8SahiDetectionModel(config, config.env["yolo"]["cs_model"])
+    yolov8_sahi = Yolov8SahiDetectionModel(config,
+                                           config.env["yolo"]["cs_model"],
+                                           config.env["detect_crosswalk_signal"]["confidence_threshold"])
     vision = Vision(config)
 
 
@@ -71,7 +74,7 @@ def slow_processing(image, depth_image, n):
         if mean is not None:
             img = draw_blur_status(image, mean, blurry)
 
-        sahi_prediction_list = yolov8_sahi(image, config.env["detect_crosswalk_signal"]["confidence_threshold"])
+        sahi_prediction_list = yolov8_sahi(image)
         finished = True
 
         if len(sahi_prediction_list) > 0:
@@ -83,6 +86,7 @@ def slow_processing(image, depth_image, n):
             detect_cs.invalid()
 
         dcs_img = img
+        Gui.instance.display_image(dcs_img, 3)
 
     Thread(target=fn).start()
 
@@ -136,8 +140,9 @@ def update_frame(main_window: Gui):
         )
 
     frame_number = frames.get_frame_number()
-    # if yolov8_sahi:
-    #     slow_processing(color_image, depth_image, frame_number)
+    global yolov8_sahi
+    if yolov8_sahi:
+        slow_processing(color_image, depth_image, frame_number)
 
     global dcs_img
     if dcs_img is None:
@@ -153,7 +158,6 @@ def update_frame(main_window: Gui):
     main_window.display_image(combined_img, 0)
     main_window.display_image(combined_depth_colormap, 1)
     main_window.display_image(detect_object_img, 2)
-    main_window.display_image(heatmap, 3)
 
 
 gui = Gui(config, update_frame)

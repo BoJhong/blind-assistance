@@ -9,10 +9,9 @@ from src.core.models.base import DetectionModel
 
 
 class Yolov8SahiDetectionModel(DetectionModel):
-    def load_env(self, config: Any, confidence_threshold: float = 0.5):
+    def load_env(self, config: Any):
         self.yolo_env = config.env["yolo"]
         self.sahi_env = config.env["sahi"]
-        self.confidence_threshold = confidence_threshold
 
     def load_model(self):
         self.set_model(
@@ -23,7 +22,10 @@ class Yolov8SahiDetectionModel(DetectionModel):
                 confidence_threshold=self.confidence_threshold,
             ),
         )
-        print(f"Model loaded: {self.model_path}")
+        print("=" * 50)
+        print(f"YOLOv8 SAHI模型已加載: {self.model_path}")
+        print(f"置信度閾值: {self.confidence_threshold}")
+        print("=" * 50)
         """ "
         檢測模型已經初始化並成功設定為 self.model
         （需要利用self.model_path、self.config_path和self.device）

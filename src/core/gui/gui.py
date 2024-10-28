@@ -63,6 +63,15 @@ class RealSenseThread(QThread):
             Gui.instance.toggle_camera_btn.setEnabled(True)
             Gui.instance.toggle_camera_btn.setChecked(True)
 
+            exposure = Gui.instance.exposure_slider.value()
+            if exposure == 0:
+                Gui.instance.exposure_label.setText(f'曝光: 自動曝光')
+                self.rs_camera.enable_auto_exposure()
+            else:
+                Gui.instance.exposure_label.setText(f'曝光: {exposure}')
+                self.rs_camera.disable_auto_exposure()
+                self.rs_camera.set_exposure(Gui.instance.exposure_slider.value())
+
             while self.is_running:
                 try:
                     self.run_func(Gui.instance)
@@ -211,8 +220,10 @@ class Gui(QMainWindow):
 
         self.body_height_slider.valueChanged.connect(self.set_body_height)
         self.camera_height_slider.valueChanged.connect(self.set_camera_height)
+        self.exposure_slider.valueChanged.connect(self.set_exposure)
         self.body_height_slider.setValue(self.config.env["obstacle_detection"]["my_height"])
         self.camera_height_slider.setValue(self.config.env["obstacle_detection"]["camera_height"])
+        self.set_exposure()
 
     @pyqtSlot(str)
     def update_status(self, message):
@@ -381,6 +392,18 @@ class Gui(QMainWindow):
     def set_camera_height(self):
         self.camera_height_label.setText(f'攝影機高度: {self.camera_height_slider.value()}')
         self.config.env["obstacle_detection"]["camera_height"] = self.camera_height_slider.value()
+
+    def set_exposure(self):
+        exposure = self.exposure_slider.value()
+        if exposure == 0:
+            self.exposure_label.setText(f'曝光: 自動曝光')
+            if RealsenseCamera.instance is not None:
+                RealsenseCamera.instance.enable_auto_exposure()
+        else:
+            self.exposure_label.setText(f'曝光: {self.exposure_slider.value()}')
+            if RealsenseCamera.instance is not None:
+                RealsenseCamera.instance.disable_auto_exposure()
+                RealsenseCamera.instance.set_exposure(self.exposure_slider.value())
 
     def adjust_camera_height(self):
         if RealsenseCamera.instance is None:

@@ -5,6 +5,7 @@ from typing import Any
 
 import cv2
 import imutils
+import numpy as np
 from PIL import Image
 
 from .utils import find_nearest
@@ -30,6 +31,10 @@ class DetectCrosswalkSignal:
         self.signal_status = SignalStatus.NONE
         self.invalid_time = -1
         self.is_alarm = False
+        self.alerted = False
+        self.consecutive_frames = 0
+        self.previous_box = None
+        self.frame_buffer = []
 
     def __call__(self, image, prediction_list, names):
         """
@@ -39,13 +44,14 @@ class DetectCrosswalkSignal:
         :param names: 模型所有類別名稱
         :return image: 畫上行人號誌的圖片
         """
+        # 如果正在播報警聲，就先暫時不偵測行人號誌
         if self.is_alarm:
             return
 
         # 找出最接近畫面中心和最近的行人號誌
         found, nearest_object = find_nearest(image, prediction_list, names)
 
-        if not found:
+        if not found and self.alerted:
             self.invalid()
             return
 
@@ -57,11 +63,31 @@ class DetectCrosswalkSignal:
         elif class_name == "green":
             signal_status = SignalStatus.GREEN
 
-        self.invalid_time = -1
-
+        # Check if the signal status has changed
         if self.signal_status != signal_status:
             self.signal_status = signal_status
-            self.alert()
+            self.consecutive_frames = 1
+            self.previous_box = box
+            self.frame_buffer = []  # reset the frame buffer
+        else:
+            # Calculate the distance between the current box and the previous box
+            box_distance = np.linalg.norm(np.array(box) - np.array(self.previous_box))
+            if box_distance < 50:  # adjust this value to set the maximum allowed distance
+                self.consecutive_frames += 1
+                self.previous_box = box
+                self.frame_buffer.append((box, signal_status))  # add the current frame to the buffer
+            else:
+                self.consecutive_frames = 1
+                self.previous_box = box
+                self.frame_buffer = [(box, signal_status)]  # reset the frame buffer with the current frame
+
+        # Check if we have at least 3 frames with similar box coordinates and the same signal status within the last 5 frames
+        if len(self.frame_buffer) >= 5 and not self.alerted:
+            similar_frames = [frame for frame in self.frame_buffer if
+                              np.linalg.norm(np.array(frame[0]) - np.array(self.previous_box)) < 50 and frame[
+                                  1] == self.signal_status]
+            if len(similar_frames) >= 3:
+                self.alert()
 
         return box
 
@@ -85,6 +111,8 @@ class DetectCrosswalkSignal:
         """
         if self.signal_status == SignalStatus.NONE:
             return
+
+        self.alerted = True
 
         if TOMLConfig.instance.env["alarm"]["tts_enable"]:
             if self.signal_status == SignalStatus.RED:
@@ -127,7 +155,7 @@ class DetectCrosswalkSignal:
         """
         無法辨識行人號誌時，重置狀態
         """
-        if self.signal_status == SignalStatus.NONE:
+        if self.signal_status == SignalStatus.NONE or not self.alerted:
             return
 
         time_now = time.time() * 1000
@@ -138,12 +166,16 @@ class DetectCrosswalkSignal:
         elif time_now - self.invalid_time > invalid_time:
             self.invalid_time = -1
             self.signal_status = SignalStatus.NONE
+            self.alerted = False
 
             if TOMLConfig.instance.env["alarm"]["tts_enable"]:
                 threading.Thread(target=self._speak, args=("行人號誌已離開視線",)).start()
 
             else:
                 print("行人號誌已離開視線")
+                self.consecutive_frames = 0
+                self.previous_box = None
+
                 notes = ["E4", "D4"]
                 threading.Thread(target=self.play_notes, args=notes).start()
 

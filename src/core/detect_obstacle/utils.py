@@ -41,8 +41,8 @@ def init_detect_points(od_env, img_height, img_width, area, spilt_count=60):
         temp = []
         for x in range(0, int(img_width / spilt_count) + 2):
             color_pixel = (x * spilt_count, y * spilt_count)
-            if cv2.pointPolygonTest(area, color_pixel, False) == -1:
-                continue
+            # if cv2.pointPolygonTest(area, color_pixel, False) == -1:
+            #     continue
             temp.append(color_pixel)
         detect_points.append(temp)
     return detect_points

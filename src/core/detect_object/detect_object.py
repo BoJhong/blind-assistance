@@ -36,7 +36,6 @@ class DetectObject:
         for class_id, box, score, track_id in prediction_list:
             class_name = self.yolov8.category[class_id]
             if class_name not in object_whitelist:
-                print(f"not in whitelist: {class_name}")
                 prediction_list.remove((class_id, box, score, track_id))
                 continue
 

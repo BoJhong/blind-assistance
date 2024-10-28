@@ -29,8 +29,9 @@ class RealsenseCamera:
         self.pipeline = rs.pipeline()
         self.config = setting or default_setting(file)
         self.profile = self.pipeline.start(self.config)
+        self.is_replay = not not file
 
-        if file:
+        if self.is_replay:
             device = self.config.resolve(self.pipeline).get_device()
             playback = device.as_playback()
             playback.set_real_time(False)
@@ -39,11 +40,9 @@ class RealsenseCamera:
         self.yaw = 0
         self.roll = 0
 
+        color_sensor = self.profile.get_device().first_color_sensor()
         depth_sensor = self.profile.get_device().first_depth_sensor()
-        # 關閉自動曝光 並且不是唯讀的
-        if file is None and depth_sensor.supports(rs.option.enable_auto_exposure):
-            depth_sensor.set_option(rs.option.enable_auto_exposure, False)
-
+        self.disable_auto_exposure()
         self.depth_scale = depth_sensor.get_depth_scale()
 
         (
@@ -52,6 +51,33 @@ class RealsenseCamera:
             self.depth_to_color_extrin,
             self.color_to_depth_extrin,
         ) = intrin_and_extrin(self.profile)
+
+    def enable_auto_exposure(self) -> None:
+        """
+        使能自動曝光
+        """
+        color_sensor = self.profile.get_device().first_color_sensor()
+        if not self.is_replay and color_sensor.supports(rs.option.enable_auto_exposure):
+            color_sensor.set_option(rs.option.enable_auto_exposure, True)
+
+    def disable_auto_exposure(self) -> None:
+        """
+        關閉自動曝光
+        """
+        color_sensor = self.profile.get_device().first_color_sensor()
+        if not self.is_replay and color_sensor.supports(rs.option.enable_auto_exposure):
+            color_sensor.set_option(rs.option.enable_auto_exposure, False)
+
+    def set_exposure(self, exposure: float) -> None:
+        """
+        設定曝光值
+        """
+        color_sensor = self.profile.get_device().first_color_sensor()
+        if not self.is_replay and color_sensor.supports(rs.option.exposure):
+            color_sensor.set_option(rs.option.exposure, exposure)
+
+    def __enter__(self):
+        return self
 
     @property
     def motion(self):

@@ -7,9 +7,8 @@ from .base import DetectionModel
 
 
 class Yolov8DetectionModel(DetectionModel):
-    def load_env(self, config: Any, confidence_threshold: float = 0.5):
+    def load_env(self, config: Any):
         self.yolo_env = config.env["yolo"]
-        self.confidence_threshold = confidence_threshold
 
     def load_model(self):
         """ "
@@ -17,7 +16,10 @@ class Yolov8DetectionModel(DetectionModel):
         （需要利用self.model_path、self.config_path和self.device）
         """
         self.set_model(YOLO(self.model_path))
-        print(f"Model loaded: {self.model_path}")
+        print("=" * 50)
+        print(f"YOLOv8模型已加載: {self.model_path}")
+        print(f"置信度閾值: {self.confidence_threshold}")
+        print("=" * 50)
 
     def set_model(self, model: Any):
         """
