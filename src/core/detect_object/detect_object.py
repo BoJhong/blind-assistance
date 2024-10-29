@@ -26,6 +26,7 @@ class DetectObject:
         self.yolov8 = Yolov8DetectionModel(config, config.env["yolo"]["model"], self.do_env["confidence_threshold"])
         self.detection_times = {}
         self.last_alarm_time = 0
+        self.last_alarm_object = None
         self.object_queue = []
 
     def __call__(self, color_image, depth_frame=None):
@@ -122,6 +123,9 @@ class DetectObject:
         name, track_id, direction, dist = self.object_queue[0]
         self.object_queue = []
 
+        if self.last_alarm_object.name + self.last_alarm_object.track_id == name + track_id and time_now - self.last_alarm_time < 3000:
+            return
+
         if dist > 1000:
             dist_str = f"{str(round(dist / 100) / 10).replace('.', '點')}公尺"  # 毫米轉公尺
         elif dist >= 100:
@@ -133,6 +137,7 @@ class DetectObject:
         print(dist)
 
         self.last_alarm_time = time_now
+        self.last_alarm_object = (name, track_id, direction, dist)
         threading.Thread(target=self._speak, args=(f"{direction}{dist_str}有{name}{track_id}",)).start()
 
     def _speak(self, message):
