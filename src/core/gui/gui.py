@@ -69,7 +69,6 @@ class RealSenseThread(QThread):
                 self.rs_camera.enable_auto_exposure()
             else:
                 Gui.instance.exposure_label.setText(f'曝光: {exposure}')
-                self.rs_camera.disable_auto_exposure()
                 self.rs_camera.set_exposure(Gui.instance.exposure_slider.value())
 
             while self.is_running:
@@ -221,9 +220,12 @@ class Gui(QMainWindow):
         self.body_height_slider.valueChanged.connect(self.set_body_height)
         self.camera_height_slider.valueChanged.connect(self.set_camera_height)
         self.exposure_slider.valueChanged.connect(self.set_exposure)
+        self.lateral_distance_threshold_slider.valueChanged.connect(self.set_lateral_distance_threshold)
         self.body_height_slider.setValue(self.config.env["obstacle_detection"]["my_height"])
         self.camera_height_slider.setValue(self.config.env["obstacle_detection"]["camera_height"])
-        self.set_exposure()
+        self.exposure_slider.setValue(self.config.env["realsense"]["exposure"])
+        self.lateral_distance_threshold_slider.setValue(self.config.env["obstacle_detection"]["lateral_distance_threshold"])
+
 
     @pyqtSlot(str)
     def update_status(self, message):
@@ -340,6 +342,14 @@ class Gui(QMainWindow):
         except Exception as e:
             print(e)
 
+    def update_crosswalk_signal_status(self, status):
+        if status == 0:
+            self.alert_label_3.setText("行人號誌狀態: 無")
+        elif status == 1:
+            self.alert_label_3.setText("行人號誌狀態: 紅燈")
+        elif status == 2:
+            self.alert_label_3.setText("行人號誌狀態: 綠燈")
+
     def send_prompt(self):
         threading.Thread(target=Vision.instance.predict, args=(
             Image.fromarray(self.color_image),
@@ -386,11 +396,11 @@ class Gui(QMainWindow):
             self.green_light_btn.setChecked(False)
 
     def set_body_height(self):
-        self.body_height_label.setText(f'身高: {self.body_height_slider.value()}')
+        self.body_height_label.setText(f'身高: {self.body_height_slider.value()}cm')
         self.config.env["obstacle_detection"]["my_height"] = self.body_height_slider.value()
 
     def set_camera_height(self):
-        self.camera_height_label.setText(f'攝影機高度: {self.camera_height_slider.value()}')
+        self.camera_height_label.setText(f'攝影機高度: {self.camera_height_slider.value()}cm')
         self.config.env["obstacle_detection"]["camera_height"] = self.camera_height_slider.value()
 
     def set_exposure(self):
@@ -404,6 +414,10 @@ class Gui(QMainWindow):
             if RealsenseCamera.instance is not None:
                 RealsenseCamera.instance.disable_auto_exposure()
                 RealsenseCamera.instance.set_exposure(self.exposure_slider.value())
+
+    def set_lateral_distance_threshold(self):
+        self.config.env["obstacle_detection"]["lateral_distance_threshold"] = self.lateral_distance_threshold_slider.value()
+        self.lateral_distance_threshold_label.setText(f'障礙物橫向距離閥值: {self.lateral_distance_threshold_slider.value()}mm')
 
     def adjust_camera_height(self):
         if RealsenseCamera.instance is None:
@@ -444,10 +458,12 @@ class Gui(QMainWindow):
     def toggle_tts(self):
         if self.tts_btn.isChecked():
             self.tts_btn.setText('關閉語音播報')
-            TTS.exec_status = True
         else:
             self.tts_btn.setText('開啟語音播報')
-            TTS.exec_status = False
+
+        if TTS.instance is not None:
+            TTS.exec_status = self.tts_btn.isChecked()
+        self.config.env["alarm"]["tts_enable"] = self.tts_btn.isChecked()
 
 
 

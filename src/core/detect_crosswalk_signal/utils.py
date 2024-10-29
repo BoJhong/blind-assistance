@@ -20,6 +20,13 @@ def find_nearest(image, prediction_list, names):
         if class_name != "red" and class_name != "green":
             continue
 
+        width = box[2] - box[0]
+        height = box[3] - box[1]
+
+        if height / width > 2.5 or height / width < 0.7:
+            print(f"行人號誌比例不對，已略過\n高度 / 寬度 = {height / width}")
+            continue
+
         mid_pos = (box[0] + box[2]) // 2, (box[1] + box[3]) // 2
 
         # 計算行人號誌中心點和畫面中心的距離

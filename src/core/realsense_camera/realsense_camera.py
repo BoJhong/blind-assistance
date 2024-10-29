@@ -42,7 +42,9 @@ class RealsenseCamera:
 
         color_sensor = self.profile.get_device().first_color_sensor()
         depth_sensor = self.profile.get_device().first_depth_sensor()
-        self.disable_auto_exposure()
+
+        self.set_exposure(self.rs_env["exposure"])
+
         self.depth_scale = depth_sensor.get_depth_scale()
 
         (
@@ -72,9 +74,13 @@ class RealsenseCamera:
         """
         設定曝光值
         """
-        color_sensor = self.profile.get_device().first_color_sensor()
-        if not self.is_replay and color_sensor.supports(rs.option.exposure):
-            color_sensor.set_option(rs.option.exposure, exposure)
+        if exposure == 0:
+            self.enable_auto_exposure()
+        else:
+            self.disable_auto_exposure()
+            color_sensor = self.profile.get_device().first_color_sensor()
+            if not self.is_replay and color_sensor.supports(rs.option.exposure):
+                color_sensor.set_option(rs.option.exposure, exposure)
 
     def __enter__(self):
         return self

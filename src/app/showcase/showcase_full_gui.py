@@ -80,7 +80,11 @@ def slow_processing(image, depth_image, n):
         if len(sahi_prediction_list) > 0:
             nearst_box = detect_cs(image, sahi_prediction_list, yolov8_sahi.category)
             if nearst_box is not None:
+                expand_box = detect_cs.get_expand_box(image, nearst_box)
+                img = detect_cs.draw_box(img, expand_box)
                 img = detect_cs.draw_line(img, nearst_box)
+
+
             img = yolov8_sahi.draw_detections(img, sahi_prediction_list, depth_image)
         else:
             detect_cs.invalid()

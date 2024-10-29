@@ -28,7 +28,7 @@ class TTS:
             return
 
         if self.alarm_env["tts_mode"] == "ai":
-            threading.Thread(target=self.get_audio, args=(message,)).start()
+            self.get_audio(message)
         else:
             self.engine.say(message)
             self.engine.runAndWait()

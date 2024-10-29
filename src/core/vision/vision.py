@@ -31,7 +31,7 @@ class Vision:
             # low_cpu_mem_usage=True,
             # use_safetensors=True,
             # attn_implementation="flash_attention_2",
-            device_map="cuda:0",
+            device_map=device,
         ).to(device=device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
         print(f"Model loaded: {model_id}")
@@ -39,7 +39,7 @@ class Vision:
     def predict(self, image, prompt="Describe this image.", stream=None, speak=False, translate=False):
         if translate:
             prompt = GoogleTranslator(target='en').translate(prompt)
-        print(prompt)
+        # print(prompt)
 
         enc_image = self.model.encode_image(image)
         response = self.answer_question(enc_image, prompt)
@@ -49,8 +49,6 @@ class Vision:
                 continue
 
             result = txt
-            print(txt)
-            print("test")
             if stream is not None:
                 stream(txt)
 
@@ -71,16 +69,16 @@ class Vision:
 
     def answer_question(self, enc_image, prompt):
         streamer = TextIteratorStreamer(self.tokenizer, skip_special_tokens=True)
-        thread = Thread(
-            target=self.model.answer_question,
-            kwargs={
-                "image_embeds": enc_image,
-                "question": prompt,
-                "tokenizer": self.tokenizer,
-                "streamer": streamer,
-            },
-        )
-        thread.start()
+
+        # 啟動生成，使用 streamer 作為 callback
+        generation_kwargs = {
+            "image_embeds": enc_image,
+            "question": prompt,
+            "tokenizer": self.tokenizer,
+            "streamer": streamer
+        }
+        generation_thread = threading.Thread(target=self.model.answer_question, kwargs=generation_kwargs)
+        generation_thread.start()
 
         buffer = ""
         for new_text in streamer:

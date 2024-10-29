@@ -23,6 +23,7 @@ class Alarm:
         self.frequency = 2500
         self.loop = False
         self.disable = False
+        self.speaking_count = 0
 
         # self.pwm = buzzer.setup()
 
@@ -51,8 +52,10 @@ class Alarm:
         if self.alarm_env["print"]:
             logging.info(message)
 
-        if self.tts is not None:
+        if self.tts is not None and TTS.exec_status:
+            self.speaking_count += 1
             self.tts(message)
+            self.speaking_count -= 1
 
     def speak_async(self, message: str):
         threading.Thread(target=self.speak, args=(message,)).start()

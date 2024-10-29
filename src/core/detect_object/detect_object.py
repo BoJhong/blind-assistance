@@ -27,16 +27,18 @@ class DetectObject:
         self.detection_times = {}
         self.last_alarm_time = 0
         self.object_queue = []
-        self.speaking = False
 
     def __call__(self, color_image, depth_frame=None):
         prediction_list = self.yolov8(color_image, track_history)
         closest_object = None
 
-        for class_id, box, score, track_id in prediction_list:
+        # 使用倒序迴圈避免在移除list裡面的item時，發生以下的錯誤：
+        # The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+        for i in range(len(prediction_list) - 1, -1, -1):
+            class_id, box, score, track_id = prediction_list[i]
             class_name = self.yolov8.category[class_id]
             if class_name not in object_whitelist:
-                prediction_list.remove((class_id, box, score, track_id))
+                prediction_list.pop(i)
                 continue
 
             track = track_history[track_id]
@@ -104,19 +106,16 @@ class DetectObject:
             self.object_queue.append(closest_object)
 
         self._alert()
-
         return prediction_list
 
     def _alert(self):
         time_now = int(time.time() * 1000)
 
-        if self.speaking or len(self.object_queue) == 0 or time_now - self.last_alarm_time < 1000:
+        if Alarm.instance.speaking_count > 0 or len(self.object_queue) == 0 or time_now - self.last_alarm_time < 1000:
             return
 
         if DetectCrosswalkSignal.instance is not None and DetectCrosswalkSignal.instance.is_alarm:
             return
-
-        self.speaking = True
 
         # 找出最近的物體
         self.object_queue.sort(key=lambda x: x[3])
@@ -141,7 +140,6 @@ class DetectObject:
             Gui.instance.statusbar.showMessage(message)
 
         Alarm.instance.speak(message)
-        self.speaking = False
         self.last_alarm_time = int(time.time() * 1000)
 
     def draw_detections(self, image, prediction_list, depth_image = None, mask_alpha: float = 0.4):

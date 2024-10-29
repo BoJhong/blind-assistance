@@ -17,6 +17,8 @@ text_language = "中英混合"            # 文字語言
 [detect_crosswalk_signal]
 confidence_threshold = 0.3 # 置信度閥值
 invalid_time = 3           # 無效時間(秒)
+get_cooldown_timer = true  # 取得行人號誌倒數秒數
+cooldown_offset = -3       # 取得行人號誌倒數秒數偏移量
 
 [obstacle_detection]
 my_height = 180                     # 身高
@@ -55,6 +57,7 @@ lateral_distance_threshold = 500    # 橫向距離閥值（mm）
 [realsense]
 depth_min = 0.11  # 深度攝影機最近深度距離
 depth_max = 1.0   # 深度攝影機最遠深度距離
+exposure = 1000   # 曝光值
 
 [yolo]
 model = "models/yolov8n.pt"       # YOLO官方模型

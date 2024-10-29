@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>960</width>
-    <height>560</height>
+    <height>582</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -540,7 +540,7 @@ QSlider::add-page:horizontal {
        <item>
         <layout class="QVBoxLayout" name="alert_labels">
          <property name="spacing">
-          <number>0</number>
+          <number>9</number>
          </property>
          <property name="leftMargin">
           <number>9</number>
@@ -554,6 +554,22 @@ QSlider::add-page:horizontal {
          <property name="bottomMargin">
           <number>9</number>
          </property>
+         <item>
+          <widget class="QLabel" name="alert_label_3">
+           <property name="font">
+            <font>
+             <family>微軟正黑體</family>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>行人號誌狀態: 無</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QLabel" name="alert_label_1">
            <property name="font">
@@ -1098,6 +1114,82 @@ QPushButton:checked {
              </layout>
             </item>
             <item>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <property name="leftMargin">
+               <number>9</number>
+              </property>
+              <property name="topMargin">
+               <number>9</number>
+              </property>
+              <property name="rightMargin">
+               <number>9</number>
+              </property>
+              <property name="bottomMargin">
+               <number>9</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lateral_distance_threshold_label">
+                <property name="font">
+                 <font>
+                  <family>微軟正黑體</family>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>障礙物橫向距離閥值</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <item>
+                 <widget class="QLabel" name="min_lateral_distance_threshold_label">
+                  <property name="font">
+                   <font>
+                    <family>微軟正黑體</family>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>0mm</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSlider" name="lateral_distance_threshold_slider">
+                  <property name="minimum">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <number>1000</number>
+                  </property>
+                  <property name="value">
+                   <number>500</number>
+                  </property>
+                  <property name="sliderPosition">
+                   <number>500</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="max_lateral_distance_threshold_label">
+                  <property name="font">
+                   <font>
+                    <family>微軟正黑體</family>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>1000mm</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
              <widget class="QPushButton" name="tts_btn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -1246,8 +1338,20 @@ QPushButton:checked {
            <pointsize>12</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string/>
+         </property>
+         <property name="inputMask">
+          <string/>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
          <property name="frame">
           <bool>false</bool>
+         </property>
+         <property name="placeholderText">
+          <string>請輸入提示詞</string>
          </property>
         </widget>
        </item>
