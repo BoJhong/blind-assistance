@@ -112,7 +112,7 @@ class DetectObject:
     def _alert(self):
         time_now = int(time.time() * 1000)
 
-        if Alarm.instance.speaking_count > 0 or len(self.object_queue) == 0 or time_now - self.last_alarm_time < 1000:
+        if Alarm.instance.speaking_count > 0 or len(self.object_queue) == 0:
             return
 
         if DetectCrosswalkSignal.instance is not None and DetectCrosswalkSignal.instance.is_alarm:
@@ -123,8 +123,7 @@ class DetectObject:
         name, track_id, direction, dist = self.object_queue[0]
         self.object_queue = []
 
-        if self.last_alarm_object.name + self.last_alarm_object.track_id == name + track_id and time_now - self.last_alarm_time < 3000:
-            return
+
 
         if dist > 1000:
             dist_str = f"{str(round(dist / 100) / 10).replace('.', '點')}公尺"  # 毫米轉公尺
@@ -136,9 +135,10 @@ class DetectObject:
             dist_str = ""
         print(dist)
 
-        self.last_alarm_time = time_now
-        self.last_alarm_object = (name, track_id, direction, dist)
-        threading.Thread(target=self._speak, args=(f"{direction}{dist_str}有{name}{track_id}",)).start()
+        if self.last_alarm_object is None or (f"{self.last_alarm_object[0]}{self.last_alarm_object[1]}" != f"{name}{track_id}" and time_now - self.last_alarm_time > 1000) or (f"{self.last_alarm_object[0]}{self.last_alarm_object[1]}" == f"{name}{track_id}" and time_now - self.last_alarm_time > 3000):
+            threading.Thread(target=self._speak, args=(f"{direction}{dist_str}有{name}{track_id}",)).start()
+            self.last_alarm_time = time_now
+            self.last_alarm_object = (name, track_id, direction, dist)
 
     def _speak(self, message):
         if Gui.instance is not None:

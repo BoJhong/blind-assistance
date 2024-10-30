@@ -61,13 +61,16 @@ class Alarm:
         threading.Thread(target=self.speak, args=(message,)).start()
 
     def start(self, message: str = "警報！", duration: float = 1, frequency: int = 2500):
-        if self.disable or self.exec_status:
+        if self.disable:
             return
 
         self.exec_status = True
         self.duration = duration
         self.frequency = frequency
         self.message = message
+
+        if self.exec_status:
+            return
 
         # 建立並執行子執行緒
         if not self.loop:

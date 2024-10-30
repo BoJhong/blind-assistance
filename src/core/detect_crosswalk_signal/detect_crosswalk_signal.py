@@ -26,7 +26,7 @@ class DetectCrosswalkSignal:
     instance = None
 
     def __init__(self, config: Any):
-        DetectCrosswalkSignal.instance = self
+        DetectCrosswalkSignal.i8nstance = self
 
         self.dcs_env = config.env["detect_crosswalk_signal"]
         self.signal_status = SignalStatus.NONE
