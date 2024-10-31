@@ -64,39 +64,57 @@ class Alarm:
         if self.disable:
             return
 
-        self.exec_status = True
         self.duration = duration
         self.frequency = frequency
         self.message = message
 
-        if self.exec_status:
+        if Alarm.exec_status:
             return
 
-        # 建立並執行子執行緒
+        Alarm.exec_status = True
         if not self.loop:
             threading.Thread(target=self._exec_loop).start()
 
     def _exec_loop(self):
         self.loop = True
-        while self.exec_status and not self.disable:
-            self.play_sound(self.frequency, self.duration)
+        while Alarm.exec_status and not self.disable:
             if self.alarm_env["print"] and self.message is not None:
                 logging.info(self.message)
-            time.sleep(self.duration * 2)
+
+            self.bip(freq=self.frequency,
+                     dur=self.duration,
+                     volume=0.1)
+
+            next_loop = False
+
+            for _ in range(2):
+                for i in range(int(self.duration * 10)):
+                    time.sleep(0.1)
+                    if i > int(self.duration * 10):
+                        print(i)
+                        print(self.duration)
+                        next_loop = True
+                        break
+                if next_loop:
+                    break
+
+            if next_loop:
+                continue
+
         self.loop = False
 
         if self.disable:
             self.stop()
 
     def stop(self):
-        if not self.exec_status:
+        if not Alarm.exec_status:
             return
-        self.exec_status = False
+        Alarm.exec_status = False
         if self.alarm_env["print"]:
             print("停止警報")
 
     def cleanup(self):
-        self.exec_status = False
+        Alarm.exec_status = False
         # pwm.stop()
         # buzzer.cleanup()
 
