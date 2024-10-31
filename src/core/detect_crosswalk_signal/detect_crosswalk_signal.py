@@ -26,16 +26,14 @@ class DetectCrosswalkSignal:
     instance = None
 
     def __init__(self, config: Any):
-        DetectCrosswalkSignal.i8nstance = self
+        DetectCrosswalkSignal.instance = self
 
         self.dcs_env = config.env["detect_crosswalk_signal"]
         self.signal_status = SignalStatus.NONE
         self.alerted_signal_status = SignalStatus.NONE
         self.invalid_time = -1
-        self.invalid_count = 0
         self.is_alarm = False
         self.alerted = False
-        self.previous_box = None
         self.frame_buffer = []
 
     def __call__(self, image, prediction_list, names):
@@ -54,8 +52,7 @@ class DetectCrosswalkSignal:
             self.invalid()
             return
 
-        self.invalid_count = 0
-        self.invalid_time = time.time()
+        self.invalid_time = time.time() * 1000
 
         class_id, box, score = nearest_object
         class_name = names[class_id]
@@ -84,10 +81,13 @@ class DetectCrosswalkSignal:
 
         return box
 
-    def vision_countdown(self, image):
+    def vision_countdown(self, image) -> int:
         start_time = time.time()  # 紀錄開始計算的時間
-        prompt = "Please tell me the countdown seconds of the pedestrian signal closest to the center of the screen (only answer with a number)."
+        prompt = "Please tell me the number displayed on the pedestrian signal countdown. If the number is unclear or unreadable, respond with -1."
         response = Vision.instance.predict(Image.fromarray(image), prompt).strip()
+        if response == "-1":
+            print("無法辨識行人號誌倒數")
+            return -1
         end_time = time.time()
         second = int(response) if response.isdigit() else 0
         calc_time = round(end_time - start_time)  # 計算時間
@@ -109,32 +109,35 @@ class DetectCrosswalkSignal:
 
         self.alerted = True
 
-        if TOMLConfig.instance.env["alarm"]["tts_enable"]:
-            if self.signal_status == SignalStatus.RED:
-                message = "注意前方紅燈"
-            else:
-                expand_box = self.get_expand_box(image, nearst_box)
-                if Vision.instance is not None and self.dcs_env["get_cooldown"]:
-                    countdown = self.vision_countdown(image[expand_box[1]:expand_box[3], expand_box[0]:expand_box[2]])
-                    if countdown > 0:
-                        message = f"注意前方綠燈，倒數 {countdown} 秒，"
-                    else:
-                        message = "注意前方紅燈"
-                        self.signal_status = SignalStatus.RED
+        if not self.dcs_env["disable_alarm"]:
+            if TOMLConfig.instance.env["alarm"]["tts_enable"]:
+                if self.signal_status == SignalStatus.RED:
+                    message = "注意前方紅燈"
                 else:
-                    message = "注意前方綠燈"
-            threading.Thread(target=self._speak, args=(message,)).start()
-        else:
-            self.is_alarm = True
-
-            if self.signal_status == SignalStatus.RED:
-                print("紅燈")
-                notes = ["G4", "E4", "D4", "C4"]
+                    expand_box = self.get_expand_box(image, nearst_box)
+                    if Vision.instance is not None and self.dcs_env["get_cooldown"]:
+                        countdown = self.vision_countdown(image[expand_box[1]:expand_box[3], expand_box[0]:expand_box[2]])
+                        if countdown == -1:
+                            message = "注意前方綠燈"
+                        elif countdown > 0:
+                            message = f"注意前方綠燈，倒數 {countdown} 秒，"
+                        else:
+                            message = "注意前方紅燈"
+                            self.signal_status = SignalStatus.RED
+                    else:
+                        message = "注意前方綠燈"
+                threading.Thread(target=self._speak, args=(message,)).start()
             else:
-                print("綠燈")
-                notes = ["C4", "D4", "E4", "G4"]
+                self.is_alarm = True
 
-            threading.Thread(target=self.play_notes, args=notes).start()
+                if self.signal_status == SignalStatus.RED:
+                    print("紅燈")
+                    notes = ["G4", "E4", "D4", "C4"]
+                else:
+                    print("綠燈")
+                    notes = ["C4", "D4", "E4", "G4"]
+
+                threading.Thread(target=self.play_notes, args=notes).start()
 
         if Gui.instance is not None:
             Gui.instance.update_crosswalk_signal_status(self.signal_status.value)
@@ -206,29 +209,26 @@ class DetectCrosswalkSignal:
             self.frame_buffer = self.frame_buffer[-8:]
             print(f"frame buffer: {len(self.frame_buffer)}")
 
-        if time_now - self.invalid_time > invalid_time and self.invalid_count > 5:
+        if time_now - self.invalid_time > invalid_time:
             self.invalid_time = -1
             self.signal_status = SignalStatus.NONE
             self.alerted = False
-            self.invalid_count = 0
             Gui.instance.update_crosswalk_signal_status(self.signal_status.value)
             self.alerted_signal_status = SignalStatus.NONE
+            self.frame_buffer = []
 
-            if TOMLConfig.instance.env["alarm"]["tts_enable"]:
-                threading.Thread(target=self._speak, args=("行人號誌已離開視線",)).start()
+            if not self.dcs_env["disable_alarm"]:
+                if TOMLConfig.instance.env["alarm"]["tts_enable"]:
+                    threading.Thread(target=self._speak, args=("行人號誌已離開視線",)).start()
 
-            else:
-                print("行人號誌已離開視線")
-                self.consecutive_frames = 0
-                self.previous_box = None
+                else:
+                    print("行人號誌已離開視線")
 
-                notes = ["E4", "D4"]
-                threading.Thread(target=self.play_notes, args=notes).start()
+                    notes = ["E4", "D4"]
+                    threading.Thread(target=self.play_notes, args=notes).start()
             return
         elif self.invalid_time == -1:
             self.invalid_time = time_now
-
-        self.invalid_count += 1
 
     def is_none(self):
         return self.signal_status == SignalStatus.NONE

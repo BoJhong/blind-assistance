@@ -204,6 +204,11 @@ class Gui(QMainWindow):
         self.speech_btn.clicked.connect(self.toggle_speech)
         self.alarm_btn.clicked.connect(self.toggle_alarm)
         self.tts_btn.clicked.connect(self.toggle_tts)
+        self.traffic_btn.clicked.connect(self.toggle_traffic)
+        self.auto_camera_height_btn.clicked.connect(self.toggle_auto_camera_height)
+
+        self.traffic_btn.setChecked(not self.config.env["detect_crosswalk_signal"]["disable_alarm"])
+        self.auto_camera_height_btn.setChecked(self.config.env["obstacle_detection"]["enable_auto_camera_height"])
 
         self.chat_btn.setChecked(False)
         self.chat_widget.setVisible(False)
@@ -471,6 +476,21 @@ class Gui(QMainWindow):
             TTS.exec_status = self.tts_btn.isChecked()
         self.config.env["alarm"]["tts_enable"] = self.tts_btn.isChecked()
 
+    def toggle_traffic(self):
+        if self.traffic_btn.isChecked():
+            self.traffic_btn.setText('關閉行人號誌警報')
+        else:
+            self.traffic_btn.setText('開啟行人號誌警報')
+
+        self.config.env["detect_crosswalk_signal"]["disable_alarm"] = not self.traffic_btn.isChecked()
+
+    def toggle_auto_camera_height(self):
+        if self.auto_camera_height_btn.isChecked():
+            self.auto_camera_height_btn.setText('關閉自動校準攝影機高度')
+        else:
+            self.auto_camera_height_btn.setText('開啟自動校準攝影機高度')
+
+        self.config.env["obstacle_detection"]["enable_auto_camera_height"] = self.auto_camera_height_btn.isChecked()
 
 
 

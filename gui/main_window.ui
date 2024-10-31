@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>960</width>
-    <height>589</height>
+    <height>560</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -849,9 +849,9 @@ QSlider::add-page:horizontal {
            <property name="geometry">
             <rect>
              <x>30</x>
-             <y>20</y>
+             <y>10</y>
              <width>351</width>
-             <height>491</height>
+             <height>521</height>
             </rect>
            </property>
            <property name="styleSheet">
@@ -899,17 +899,20 @@ QPushButton:checked {
             </property>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_4">
+              <property name="spacing">
+               <number>0</number>
+              </property>
               <property name="leftMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="topMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="rightMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="bottomMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <item>
                <widget class="QLabel" name="body_height_label">
@@ -969,17 +972,20 @@ QPushButton:checked {
             </item>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_5">
+              <property name="spacing">
+               <number>0</number>
+              </property>
               <property name="leftMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="topMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="rightMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="bottomMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <item>
                <widget class="QLabel" name="camera_height_label">
@@ -1039,17 +1045,20 @@ QPushButton:checked {
             </item>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_8">
+              <property name="spacing">
+               <number>0</number>
+              </property>
               <property name="leftMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="topMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="rightMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="bottomMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <item>
                <widget class="QLabel" name="exposure_label">
@@ -1115,17 +1124,20 @@ QPushButton:checked {
             </item>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_11">
+              <property name="spacing">
+               <number>0</number>
+              </property>
               <property name="leftMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="topMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="rightMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="bottomMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <item>
                <widget class="QLabel" name="lateral_distance_threshold_label">
@@ -1192,16 +1204,16 @@ QPushButton:checked {
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_13">
               <property name="leftMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="topMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="rightMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="bottomMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <item>
                <widget class="QLabel" name="detect_point_size_label">
@@ -1266,7 +1278,86 @@ QPushButton:checked {
              </layout>
             </item>
             <item>
-             <widget class="QPushButton" name="tts_btn">
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="0" column="0">
+               <widget class="QPushButton" name="alarm_btn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>微軟正黑體</family>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>關閉警示音</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="resources.qrc">
+                  <normaloff>:/img/alarm_light.png</normaloff>
+                  <normalon>:/img/alarm_dark.png</normalon>:/img/alarm_light.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="tts_btn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>微軟正黑體</family>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>關閉語音播報</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="resources.qrc">
+                  <normaloff>:/img/mic_light.png</normaloff>
+                  <normalon>:/img/mic_dark.png</normalon>:/img/mic_light.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+                <property name="autoExclusive">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="traffic_btn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -1280,12 +1371,11 @@ QPushButton:checked {
                </font>
               </property>
               <property name="text">
-               <string>關閉語音播報</string>
+               <string>開啟行人號誌警報</string>
               </property>
               <property name="icon">
                <iconset resource="resources.qrc">
-                <normaloff>:/img/mic_light.png</normaloff>
-                <normalon>:/img/mic_dark.png</normalon>:/img/mic_light.png</iconset>
+                <normaloff>:/img/green_light.png</normaloff>:/img/green_light.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -1297,7 +1387,7 @@ QPushButton:checked {
                <bool>true</bool>
               </property>
               <property name="checked">
-               <bool>true</bool>
+               <bool>false</bool>
               </property>
               <property name="autoExclusive">
                <bool>false</bool>
@@ -1305,7 +1395,7 @@ QPushButton:checked {
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="alarm_btn">
+             <widget class="QPushButton" name="auto_camera_height_btn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -1319,12 +1409,12 @@ QPushButton:checked {
                </font>
               </property>
               <property name="text">
-               <string>關閉警示音</string>
+               <string>開啟自動校準攝影機高度</string>
               </property>
               <property name="icon">
                <iconset resource="resources.qrc">
-                <normaloff>:/img/alarm_light.png</normaloff>
-                <normalon>:/img/alarm_dark.png</normalon>:/img/alarm_light.png</iconset>
+                <normaloff>:/img/camera_light.png</normaloff>
+                <normalon>:/img/camera_dark.png</normalon>:/img/camera_light.png</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -1335,8 +1425,8 @@ QPushButton:checked {
               <property name="checkable">
                <bool>true</bool>
               </property>
-              <property name="checked">
-               <bool>true</bool>
+              <property name="autoExclusive">
+               <bool>false</bool>
               </property>
              </widget>
             </item>

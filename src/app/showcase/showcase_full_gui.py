@@ -1,6 +1,7 @@
 import os
 import sys
 import threading
+import time
 from threading import Thread
 
 import cv2
@@ -49,51 +50,40 @@ slow_thread = None
 finished = True
 frame_number = 0
 
-
-def slow_processing(image, depth_image, n):
-    global blurry, last_process_frame, finished
-    if not finished:
-        return
-
-    mean = None
-    # if detect_cs.is_none():
-    #     if n % 15 != 0 and not blurry:
-    #         return
-    #
-    #     (mean, blurry) = detect_blur_fft(image)
-    #     if blurry and n // 15 - last_process_frame < 5:
-    #         return
-
-    last_process_frame = n // 15
-    finished = False
-
-    def fn():
-        global dcs_img, blurry, frame_number, finished
-        img = image.copy()
-
-        if mean is not None:
-            img = draw_blur_status(image, mean, blurry)
-
-        sahi_prediction_list = yolov8_sahi(image)
-        finished = True
-
-        if len(sahi_prediction_list) > 0:
-            nearst_box = detect_cs(image, sahi_prediction_list, yolov8_sahi.category)
-            if nearst_box is not None:
-                expand_box = detect_cs.get_expand_box(image, nearst_box)
-                img = detect_cs.draw_box(img, expand_box)
-                img = detect_cs.draw_line(img, nearst_box)
+depth_image = None
+color_image = None
 
 
-            img = yolov8_sahi.draw_detections(img, sahi_prediction_list, depth_image)
-        else:
-            detect_cs.invalid()
+def slow_processing():
+    while True:
+        try:
+            global depth_image, color_image, yolov8_sahi
 
-        dcs_img = img
-        Gui.instance.display_image(dcs_img, 3)
+            if depth_image is None or color_image is None or yolov8_sahi is None:
+                time.sleep(0.1)
+                continue
 
-    Thread(target=fn).start()
+            output_image = color_image.copy()
+            sahi_prediction_list = yolov8_sahi(color_image)
 
+            if len(sahi_prediction_list) > 0:
+                nearst_box = detect_cs(color_image, sahi_prediction_list, yolov8_sahi.category)
+                if nearst_box is not None:
+                    expand_box = detect_cs.get_expand_box(color_image, nearst_box)
+                    output_image = detect_cs.draw_box(output_image, expand_box)
+                    output_image = detect_cs.draw_line(output_image, nearst_box)
+
+
+                output_image = yolov8_sahi.draw_detections(output_image, sahi_prediction_list, depth_image)
+            else:
+                detect_cs.invalid()
+
+            Gui.instance.display_image(output_image, 3)
+
+        except Exception as e:
+            print(e)
+
+threading.Thread(target=slow_processing).start()
 
 def update_frame(main_window: Gui):
     if RealsenseCamera.instance is None:
@@ -110,11 +100,12 @@ def update_frame(main_window: Gui):
         return
 
     bottom_point, camera_height = RealsenseCamera.instance.auto_camera_height(depth_frame)
-    # if camera_height is not None:
-    #     config.env["obstacle_detection"]["camera_height"] = camera_height
-    #     Gui.instance.camera_height_slider.setValue(camera_height)
-    #     Gui.instance.statusbar.showMessage(f'攝影機高度已調整為: {camera_height}')
+    if config.env["obstacle_detection"]["enable_auto_camera_height"] and camera_height is not None:
+        config.env["obstacle_detection"]["camera_height"] = camera_height
+        Gui.instance.camera_height_slider.setValue(camera_height)
+        Gui.instance.statusbar.showMessage(f'攝影機高度已調整為: {camera_height}')
 
+    global depth_image, color_image
     depth_image = np.asanyarray(depth_frame.get_data())
     color_image = np.asanyarray(color_frame.get_data())
 
@@ -142,11 +133,6 @@ def update_frame(main_window: Gui):
         detect_object_img = detect_object.draw_detections(
             detect_object_img, prediction_list, depth_image, 0
         )
-
-    frame_number = frames.get_frame_number()
-    global yolov8_sahi
-    if yolov8_sahi:
-        slow_processing(color_image, depth_image, frame_number)
 
     global dcs_img
     if dcs_img is None:

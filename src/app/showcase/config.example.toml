@@ -15,12 +15,14 @@ prompt_language = "zh"               # 提示文字語言
 text_language = "中英混合"            # 文字語言
 
 [detect_crosswalk_signal]
+disable_alarm = false      # 禁用行人號誌警報
 confidence_threshold = 0.3 # 置信度閥值
 invalid_time = 3           # 無效時間(秒)
 get_cooldown_timer = true  # 取得行人號誌倒數秒數
 cooldown_offset = -3       # 取得行人號誌倒數秒數偏移量
 
 [obstacle_detection]
+enable_auto_camera_height = false   # 自動調整攝影機高度
 my_height = 180                     # 身高
 camera_height = 100                 # 攝影機高度
 detect_point_size = 50              # 每個偵測點的大小
@@ -58,7 +60,7 @@ lateral_distance_threshold = 500    # 橫向距離閥值（mm）
 [realsense]
 depth_min = 0.11  # 深度攝影機最近深度距離
 depth_max = 1.0   # 深度攝影機最遠深度距離
-exposure = 1000   # 曝光值
+exposure = 0      # 曝光值 （0~2000，0為自動曝光）
 
 [yolo]
 model = "models/yolov8n.pt"       # YOLO官方模型

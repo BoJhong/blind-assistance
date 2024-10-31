@@ -90,8 +90,8 @@ def draw_square(image, pixel, color, thickness=1, size=30):
 
 
 # 繪製圓形
-def draw_circle(image, pixel, color, thickness=1):
-    return cv2.circle(image, pixel, 3, color, -1)
+def draw_circle(image, pixel, size, color):
+    return cv2.circle(image, pixel, size, color, -1)
 
 
 # 繪製文字

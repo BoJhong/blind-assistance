@@ -146,7 +146,7 @@ class DetectObstacle:
                         color_img, color_pixel, color, size=square_size
                     )
 
-                    if self.detect_point_size >= 20:
+                    if self.detect_point_size >= 30:
                         font_scale = self.detect_point_size / 100 * 0.75
                         color_img = draw_text(
                             color_img,
@@ -165,7 +165,7 @@ class DetectObstacle:
                             (255, 0, 0),
                             font_scale,
                         )
-                    depth_img = draw_circle(depth_img, depth_pixel, color)
+                    depth_img = draw_circle(depth_img, depth_pixel, self.detect_point_size // 10, color)
 
             if closest_point is not None and debug:
                 elevation_view_points.append(closest_point)
