@@ -35,7 +35,6 @@ class DetectCrosswalkSignal:
         self.invalid_count = 0
         self.is_alarm = False
         self.alerted = False
-        self.consecutive_frames = 0
         self.previous_box = None
         self.frame_buffer = []
 
@@ -61,37 +60,26 @@ class DetectCrosswalkSignal:
         class_id, box, score = nearest_object
         class_name = names[class_id]
 
-        expand_size = 10
-
         if class_name == "red":
-            signal_status = SignalStatus.RED
+            self.signal_status = SignalStatus.RED
         elif class_name == "green":
-            signal_status = SignalStatus.GREEN
+            self.signal_status = SignalStatus.GREEN
 
-        # Check if the signal status has changed
-        if self.signal_status != signal_status:
-            self.signal_status = signal_status
-            self.consecutive_frames = 1
-            self.previous_box = box
-            self.frame_buffer = []  # reset the frame buffer
-        else:
-            # Calculate the distance between the current box and the previous box
-            box_distance = np.linalg.norm(np.array(box) - np.array(self.previous_box))
-            if box_distance < 50:  # adjust this value to set the maximum allowed distance
-                self.consecutive_frames += 1
-                self.previous_box = box
-                self.frame_buffer.append((box, signal_status))  # add the current frame to the buffer
-            else:
-                self.consecutive_frames = 1
-                self.previous_box = box
-                self.frame_buffer = [(box, signal_status)]  # reset the frame buffer with the current frame
+        # Calculate the distance between the current box and the previous box
+        self.frame_buffer.append((box, self.signal_status))  # add the current frame to the buffer
+        if len(self.frame_buffer) > 8:
+            self.frame_buffer = self.frame_buffer[-8:]
+            print(f"frame buffer: {len(self.frame_buffer)}")
 
         # Check if we have at least 3 frames with similar box coordinates and the same signal status within the last 5 frames
         if len(self.frame_buffer) >= 5 and self.alerted_signal_status != self.signal_status:
             similar_frames = [frame for frame in self.frame_buffer if
-                              np.linalg.norm(np.array(frame[0]) - np.array(self.previous_box)) < 50 and frame[
-                                  1] == self.signal_status]
-            if len(similar_frames) >= 3:
+                              frame is not None
+                              and np.linalg.norm(np.array(frame[0]) - np.array(box)) < 100
+                              and frame[1] == self.signal_status]
+            print(f"similar frames: {len(similar_frames)}")
+            if len(similar_frames) >= 5:
+                self.frame_buffer.clear()
                 self.alert(image, box)
 
         return box
@@ -104,8 +92,11 @@ class DetectCrosswalkSignal:
         second = int(response) if response.isdigit() else 0
         calc_time = round(end_time - start_time)  # 計算時間
         countdown = second - calc_time  # 扣除計算時間後的倒數秒數
+        cooldown_offset = self.dcs_env["cooldown_offset"]
+        countdown += cooldown_offset
         print(f"預測 {second} 秒")
         print(f"計算 {calc_time} 秒")
+        print(f"時間偏移 {cooldown_offset} 秒")
         print(f"倒數 {countdown} 秒")
         return countdown
 
@@ -125,7 +116,6 @@ class DetectCrosswalkSignal:
                 expand_box = self.get_expand_box(image, nearst_box)
                 if Vision.instance is not None and self.dcs_env["get_cooldown"]:
                     countdown = self.vision_countdown(image[expand_box[1]:expand_box[3], expand_box[0]:expand_box[2]])
-                    countdown += self.dcs_env["cooldown_offset"]
                     if countdown > 0:
                         message = f"注意前方綠燈，倒數 {countdown} 秒，"
                     else:
@@ -211,6 +201,10 @@ class DetectCrosswalkSignal:
 
         time_now = time.time() * 1000
         invalid_time = self.dcs_env["invalid_time"] * 1000
+        self.frame_buffer.append(None)
+        if len(self.frame_buffer) > 8:
+            self.frame_buffer = self.frame_buffer[-8:]
+            print(f"frame buffer: {len(self.frame_buffer)}")
 
         if time_now - self.invalid_time > invalid_time and self.invalid_count > 5:
             self.invalid_time = -1
@@ -218,6 +212,7 @@ class DetectCrosswalkSignal:
             self.alerted = False
             self.invalid_count = 0
             Gui.instance.update_crosswalk_signal_status(self.signal_status.value)
+            self.alerted_signal_status = SignalStatus.NONE
 
             if TOMLConfig.instance.env["alarm"]["tts_enable"]:
                 threading.Thread(target=self._speak, args=("行人號誌已離開視線",)).start()
