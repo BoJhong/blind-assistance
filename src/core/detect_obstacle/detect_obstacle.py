@@ -31,6 +31,13 @@ class DetectObstacle:
             self.missing_points_buffer = []
         self.alarm = True
         self.detect_points = None
+        self.detect_point_size = -1
+
+    def init_detect_points(self):
+        self.detect_points = init_detect_points(
+            # self.do_env, img_height, img_width, area, split_count
+            self.do_env, self.img_height, self.img_width, detect_point_size=self.detect_point_size
+        )
 
     def __call__(
             self,
@@ -59,15 +66,14 @@ class DetectObstacle:
 
         depth_image = np.asanyarray(depth_frame.get_data())
 
-        area = np.array(self.do_env["area"], np.int32)
-        color_img = cv2.polylines(color_img, [area], True, (255, 255, 255), 2)
+        # area = np.array(self.do_env["area"], np.int32)
+        # color_img = cv2.polylines(color_img, [area], True, (255, 255, 255), 2)
         img_height, img_width = color_img.shape[:2]
+        self.img_height, self.img_width = img_height, img_width
 
-        if self.detect_points is None:
-            spilt_count = 40 if img_height == 480 else 60
-            self.detect_points = init_detect_points(
-                self.do_env, img_height, img_width, area, spilt_count
-            )
+        if self.detect_point_size != self.do_env["detect_point_size"]:
+            self.detect_point_size = self.do_env["detect_point_size"]
+            self.init_detect_points()
 
         if debug:
             border_img = np.zeros((img_height, img_width, 3), np.uint8)
@@ -135,29 +141,30 @@ class DetectObstacle:
                 if debug:
                     x, y = color_pixel
 
-                    square_size = 20 if img_height == 480 else 30
+                    square_size = self.detect_point_size // 2
                     color_img = draw_square(
                         color_img, color_pixel, color, size=square_size
                     )
 
-                    font_scale = 0.3 if img_height == 480 else 0.5
-                    color_img = draw_text(
-                        color_img,
-                        str(int(height)),
-                        (x, y + 15),
-                        (255, 255, 255),
-                        font_scale,
-                    )
-                    color_img = draw_text(
-                        color_img, str(dist), (x, y), (255, 200, 255), font_scale
-                    )
-                    color_img = draw_text(
-                        color_img,
-                        str(lateral_dist),
-                        (x, y - 15),
-                        (255, 0, 0),
-                        font_scale,
-                    )
+                    if self.detect_point_size >= 20:
+                        font_scale = self.detect_point_size / 100 * 0.75
+                        color_img = draw_text(
+                            color_img,
+                            str(int(height)),
+                            (x, y + font_scale * 40),
+                            (255, 255, 255),
+                            font_scale,
+                        )
+                        color_img = draw_text(
+                            color_img, str(dist), (x, y), (255, 200, 255), font_scale
+                        )
+                        color_img = draw_text(
+                            color_img,
+                            str(lateral_dist),
+                            (x, y - font_scale * 40),
+                            (255, 0, 0),
+                            font_scale,
+                        )
                     depth_img = draw_circle(depth_img, depth_pixel, color)
 
             if closest_point is not None and debug:

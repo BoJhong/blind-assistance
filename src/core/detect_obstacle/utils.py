@@ -30,17 +30,17 @@ def is_safe_area(od_env, height):
 
 
 # 初始化偵測點
-def init_detect_points(od_env, img_height, img_width, area, spilt_count=60):
+def init_detect_points(od_env, img_height, img_width, area=None, detect_point_size=60):
     global max_obstacle_dist
     max_obstacle_dist = get_max_obstacle_distance(od_env)
 
-    area = np.array(od_env["area"], np.int32)
+    # area = np.array(od_env["area"], np.int32)
     detect_points = []
 
-    for y in range(0, int(img_height / spilt_count) + 2):
+    for y in range(0, img_height // detect_point_size + 2):
         temp = []
-        for x in range(0, int(img_width / spilt_count) + 2):
-            color_pixel = (x * spilt_count, y * spilt_count)
+        for x in range(0, img_width // detect_point_size + 2):
+            color_pixel = (x * detect_point_size, y * detect_point_size)
             # if cv2.pointPolygonTest(area, color_pixel, False) == -1:
             #     continue
             temp.append(color_pixel)

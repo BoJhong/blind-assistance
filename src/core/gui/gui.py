@@ -221,10 +221,12 @@ class Gui(QMainWindow):
         self.camera_height_slider.valueChanged.connect(self.set_camera_height)
         self.exposure_slider.valueChanged.connect(self.set_exposure)
         self.lateral_distance_threshold_slider.valueChanged.connect(self.set_lateral_distance_threshold)
+        self.detect_point_size_slider.valueChanged.connect(self.set_detect_point_size)
         self.body_height_slider.setValue(self.config.env["obstacle_detection"]["my_height"])
         self.camera_height_slider.setValue(self.config.env["obstacle_detection"]["camera_height"])
         self.exposure_slider.setValue(self.config.env["realsense"]["exposure"])
         self.lateral_distance_threshold_slider.setValue(self.config.env["obstacle_detection"]["lateral_distance_threshold"])
+        self.detect_point_size_slider.setValue(self.config.env["obstacle_detection"]["detect_point_size"])
 
 
     @pyqtSlot(str)
@@ -418,6 +420,10 @@ class Gui(QMainWindow):
     def set_lateral_distance_threshold(self):
         self.config.env["obstacle_detection"]["lateral_distance_threshold"] = self.lateral_distance_threshold_slider.value()
         self.lateral_distance_threshold_label.setText(f'障礙物橫向距離閥值: {self.lateral_distance_threshold_slider.value()}mm')
+
+    def set_detect_point_size(self):
+        self.config.env["obstacle_detection"]["detect_point_size"] = self.detect_point_size_slider.value()
+        self.detect_point_size_label.setText(f'偵測點大小: {self.detect_point_size_slider.value()}')
 
     def adjust_camera_height(self):
         if RealsenseCamera.instance is None:

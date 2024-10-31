@@ -23,6 +23,7 @@ cooldown_offset = -3       # 取得行人號誌倒數秒數偏移量
 [obstacle_detection]
 my_height = 180                     # 身高
 camera_height = 100                 # 攝影機高度
+detect_point_size = 50              # 每個偵測點的大小
 lowest_obstacle_height = 5          # 最低障礙物高度
 highest_hole_height = -10           # 最高坑洞高度
 lateral_distance_threshold = 500    # 橫向距離閥值
