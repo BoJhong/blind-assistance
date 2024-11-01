@@ -25,7 +25,6 @@ class DetectObject:
         self.model_path = model_path
         self.yolov8 = Yolov8DetectionModel(config, config.env["yolo"]["model"], self.do_env["confidence_threshold"])
         self.detection_times = {}
-        self.last_alarm_time = 0
         self.last_alarm_object = None
         self.object_queue = []
 
@@ -135,10 +134,9 @@ class DetectObject:
             dist_str = ""
         print(dist)
 
-        if self.last_alarm_object is None or (f"{self.last_alarm_object[0]}{self.last_alarm_object[1]}" != f"{name}{track_id}" and time_now - self.last_alarm_time > 1000) or (f"{self.last_alarm_object[0]}{self.last_alarm_object[1]}" == f"{name}{track_id}" and time_now - self.last_alarm_time > 3000):
+        if time_now - self.last_alarm_time > 1000:
             threading.Thread(target=self._speak, args=(f"{direction}{dist_str}有{name}{track_id}",)).start()
             self.last_alarm_time = time_now
-            self.last_alarm_object = (name, track_id, direction, dist)
 
     def _speak(self, message):
         if Gui.instance is not None:

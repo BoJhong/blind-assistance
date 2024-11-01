@@ -64,18 +64,18 @@ class DetectCrosswalkSignal:
 
         # Calculate the distance between the current box and the previous box
         self.frame_buffer.append((box, self.signal_status))  # add the current frame to the buffer
-        if len(self.frame_buffer) > 8:
-            self.frame_buffer = self.frame_buffer[-8:]
+        if len(self.frame_buffer) > 6:
+            self.frame_buffer = self.frame_buffer[-6:]
             print(f"frame buffer: {len(self.frame_buffer)}")
 
         # Check if we have at least 3 frames with similar box coordinates and the same signal status within the last 5 frames
-        if len(self.frame_buffer) >= 5 and self.alerted_signal_status != self.signal_status:
+        if len(self.frame_buffer) >= 3 and self.alerted_signal_status != self.signal_status:
             similar_frames = [frame for frame in self.frame_buffer if
                               frame is not None
                               and np.linalg.norm(np.array(frame[0]) - np.array(box)) < 100
                               and frame[1] == self.signal_status]
             print(f"similar frames: {len(similar_frames)}")
-            if len(similar_frames) >= 5:
+            if len(similar_frames) >= 3:
                 self.frame_buffer.clear()
                 self.alert(image, box)
 
@@ -205,8 +205,8 @@ class DetectCrosswalkSignal:
         time_now = time.time() * 1000
         invalid_time = self.dcs_env["invalid_time"] * 1000
         self.frame_buffer.append(None)
-        if len(self.frame_buffer) > 8:
-            self.frame_buffer = self.frame_buffer[-8:]
+        if len(self.frame_buffer) > 6:
+            self.frame_buffer = self.frame_buffer[-6:]
             print(f"frame buffer: {len(self.frame_buffer)}")
 
         if time_now - self.invalid_time > invalid_time:
@@ -215,7 +215,7 @@ class DetectCrosswalkSignal:
             self.alerted = False
             Gui.instance.update_crosswalk_signal_status(self.signal_status.value)
             self.alerted_signal_status = SignalStatus.NONE
-            self.frame_buffer = []
+            self.frame_buffer.clear()
 
             if not self.dcs_env["disable_alarm"]:
                 if TOMLConfig.instance.env["alarm"]["tts_enable"]:

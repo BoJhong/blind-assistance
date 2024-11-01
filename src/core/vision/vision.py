@@ -36,6 +36,24 @@ class Vision:
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
         print(f"Model loaded: {model_id}")
 
+    def predict_without_stream(self, image, prompt="Describe this image.", stream=None, speak=False, translate=False):
+        enc_image = self.model.encode_image(image)
+        result = self.model.answer_question(enc_image, prompt, self.tokenizer)
+
+        if translate:
+            print(result)
+            result = GoogleTranslator(source='en', target='zh-TW').translate(result)
+
+        if stream is not None:
+            stream(result)
+
+        print(result)
+
+        if speak and TTS.instance is not None:
+            threading.Thread(target=TTS.instance, args=(result,)).start()
+
+        return result
+
     def predict(self, image, prompt="Describe this image.", stream=None, speak=False, translate=False):
         if translate:
             prompt = GoogleTranslator(target='en').translate(prompt)
